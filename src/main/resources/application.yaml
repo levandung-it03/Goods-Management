@@ -1,0 +1,48 @@
+server:
+  port: 8888
+  tomcat:
+    relaxed-query-chars: "[, ]"
+
+spring:
+  jackson:
+    time-zone: "Asia/Ho_Chi_Minh"
+  datasource:
+    url: "jdbc:mysql://localhost:3307/goods_management?createDatabaseIfNotExist=true&autoReconnect=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Ho_Chi_Minh&useSSL=false"
+    username: root
+    password: sa
+    driver-class-name: "com.mysql.cj.jdbc.Driver"
+  jpa:
+    database: mysql
+    database-platform: "org.hibernate.dialect.MySQL8Dialect"
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: "com.distributionsys.backend.config.CustomSqlDialect"
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      timeout: 60000
+      password:
+  mail:
+    host: "smtp.gmail.com"
+    port: 587
+    username: "homeworkoutwithai@gmail.com"
+    password: "xsem vpsd tgvv xhzg"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+services:
+  security:
+    secret-key: "JhRT3daAg7NVh6K9ObzMBYnFkFfWksA9XQw77IwU3mu7raqFPABx6d52d3gNnLJk8h5fmWpP+9+u3ZI0KbImXVp14tZt9m538xxK1w9U9Fw="
+    max-hidden-otp-age-min: 10
+    max-otp-age-min: 5
+    access-token-expired-min: 60
+    refresh-token-expired-days: 30

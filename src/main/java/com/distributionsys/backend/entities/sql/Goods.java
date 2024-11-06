@@ -1,0 +1,45 @@
+package com.distributionsys.backend.entities.sql;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.Collection;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "goods")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Goods {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "goods_id")
+    Long goodsId;
+
+    @ManyToMany
+    @JoinTable(
+        name = "warehouse_goods",
+        joinColumns = @JoinColumn(name = "goods_id", referencedColumnName = "goods_id"),
+        inverseJoinColumns = @JoinColumn(name = "warehouse_id", referencedColumnName = "warehouse_id")
+    )
+    Collection<Warehouse> warehouses;
+
+    @OneToOne
+    @JoinColumn(name = "goods_id", referencedColumnName = "supplier_id")
+    Supplier supplier;
+
+    @Column(name = "goods_name", nullable = false, length = 100)
+    String goodsName;
+
+    @Column(name = "current_quantity", nullable = false)
+    Long currentQuantity;
+
+    @Column(name = "unit_price", nullable = false)
+    Float unitPrice;
+
+    @Version
+    Long version;
+}
