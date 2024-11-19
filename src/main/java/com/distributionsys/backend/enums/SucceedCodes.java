@@ -20,6 +20,11 @@ public enum SucceedCodes {
     CHANGE_PASSWORD(21008, "Change password successfully"),
     //--Enum(22)
     GET_ALL_GENDER_ENUMS(22001, "Get all Genders successfully"),
+    //--Supplier(23)
+    GET_SUPPLIERS_PAGES(23001, "Get Suppliers pages successfully"),
+    ADD_SUPPLIER(23002, "Add Supplier successfully"),
+    DELETE_SUPPLIER(23003, "Delete Supplier successfully"),
+    UPDATE_SUPPLIER(23004, "Update Supplier successfully"),
     ;
 
     int code;

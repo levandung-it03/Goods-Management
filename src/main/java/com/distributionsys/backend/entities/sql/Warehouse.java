@@ -17,7 +17,7 @@ public class Warehouse {
     @Column(name = "warehouse_id")
     Long warehouseId;
 
-    @Column(name = "warehouse_name", nullable = false, length = 200)
+    @Column(name = "warehouse_name", nullable = false, unique = true, length = 200)
     String warehouseName;
 
     @Column(name = "address", nullable = false, length = 200)

@@ -34,12 +34,6 @@ public class Goods {
     @Column(name = "goods_name", nullable = false, length = 100)
     String goodsName;
 
-    @Column(name = "current_quantity", nullable = false)
-    Long currentQuantity;
-
     @Column(name = "unit_price", nullable = false)
     Float unitPrice;
-
-    @Version
-    Long version;
 }

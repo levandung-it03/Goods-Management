@@ -21,14 +21,14 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(value = AccessDeniedException.class)
     public ResponseEntity<ApiResponseObject<Void>> handleAuthenticationException(AccessDeniedException exception) {
         var response = ApiResponseObject.buildByErrorCodes(ErrorCodes.FORBIDDEN_USER);
-        log.info("[HANDLER]_AccessDeniedException: " + exception.getMessage());
+        log.info("[HANDLER]_AccessDeniedException: {}", exception.getMessage());
         return response;
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
     public ResponseEntity<ApiResponseObject<Void>> handleAuthenticationException(AuthenticationException exception) {
         var response = ApiResponseObject.buildByErrorCodes(ErrorCodes.INVALID_CREDENTIALS);
-        log.info("[HANDLER]_AuthenticationException: " + exception.getMessage());
+        log.info("[HANDLER]_AuthenticationException: {}", exception.getMessage());
         return response;
     }
 
@@ -42,7 +42,7 @@ public class ApplicationExceptionHandler {
             ErrorCodes.PARSE_JSON_ERR.getMessage().replace("${field}", fieldName)
         );
 
-        log.info("[HANDLER]_HttpMessageNotReadableException: " + exception.getMessage());
+        log.info("[HANDLER]_HttpMessageNotReadableException: {}", exception.getMessage());
         return response;
     }
 
@@ -58,14 +58,14 @@ public class ApplicationExceptionHandler {
                 plainErr.substring(startInd, endInd))
         );
 
-        log.info("[HANDLER]_ValidatorException: " + plainErr);
+        log.info("[HANDLER]_ValidatorException: {}", plainErr);
         return response;
     }
 
     @ExceptionHandler(value = ApplicationException.class)
     public ResponseEntity<ApiResponseObject<Void>> handleCustomApplicationException(ApplicationException exception) {
         var response = ApiResponseObject.buildByErrorCodes(exception.getErrorCodes());
-        log.info("[HANDLER]_ApplicationException: " + exception.getMessage());
+        log.info("[HANDLER]_ApplicationException: {}", exception.getMessage());
         return response;
     }
 
@@ -73,14 +73,14 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ApiResponseObject<Void>> handleConstraintViolationException(
         DataIntegrityViolationException exception) {
         var response = ApiResponseObject.buildByErrorCodes(ErrorCodes.CONSTRAINT_VIOLATION);
-        log.info("[HANDLER]_ConstraintViolationException: " + exception.getMessage());
+        log.info("[HANDLER]_ConstraintViolationException: {}", exception.getMessage());
         return response;
     }
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponseObject<Void>> handleUnawareException(Exception exception) {
         var response = ApiResponseObject.buildByErrorCodes(ErrorCodes.UNAWARE_ERR);
-        log.info("[HANDLER]_Exception: " + exception.getMessage());
+        log.info("[HANDLER]_Exception: {}", exception.getMessage());
         return response;
     }
 }

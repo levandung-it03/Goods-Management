@@ -35,7 +35,11 @@ public enum ErrorCodes {
     LOGIN_SESSION_EXPIRED(11005, "Login session is expired, please login again", BAD_REQUEST),
     DUPLICATED_EMAIL(11006, "Email is already existing", BAD_REQUEST),
     //--Enums(12)
-    INVALID_GENDER_ID(12003, "Gender Id is invalid", BAD_REQUEST),
+    INVALID_GENDER_ID(12001, "Gender Id is invalid", BAD_REQUEST),
+    //--Supplier(13)
+    DUPLICATE_SUPPLIER(13002, "Supplier is already exists!", BAD_REQUEST),
+    UPDATE_SUPPLIER(13002, "Supplier to be in used, please do not update it!", BAD_REQUEST),
+    DELETE_SUPPLIER(13003, "Supplier to be in used, please do not delete it!", BAD_REQUEST),
     ;
 
     int code;

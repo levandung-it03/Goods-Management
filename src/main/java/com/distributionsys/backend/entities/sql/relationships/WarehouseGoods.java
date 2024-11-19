@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 public class WarehouseGoods {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "warehouse_goods_id")
     Long id;
 
     @ManyToOne
@@ -25,4 +26,10 @@ public class WarehouseGoods {
     @ManyToOne
     @JoinColumn(name = "warehouse_id", referencedColumnName = "warehouse_id")
     Warehouse warehouse;
+
+    @Column(name = "current_quantity", nullable = false)
+    Long currentQuantity;
+
+    @Version
+    Long version;
 }

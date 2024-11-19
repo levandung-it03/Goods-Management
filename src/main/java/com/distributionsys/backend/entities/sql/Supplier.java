@@ -17,6 +17,6 @@ public class Supplier {
     @Column(name = "supplier_id")
     Long supplierId;
 
-    @Column(name = "supplier_name", nullable = false, length = 200)
+    @Column(name = "supplier_name", nullable = false, unique = true, length = 200)
     String supplierName;
 }
