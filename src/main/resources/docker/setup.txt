@@ -1,7 +1,0 @@
-docker pull mysql:8.0-debian
-docker run --name goods_management -p 3307:3306 -e MYSQL_ROOT_PASSWORD=sa -d mysql:8.0-debian
-docker pull redis:lastest
-docker run --name goods_management_redis -p 6380:6379 -d redis redis-server --save 60 1 --loglevel warning
-docker exec -it goods_management mysql -u root -p
-sa
-CREATE DATABASE goods_management;

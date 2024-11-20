@@ -21,14 +21,14 @@ public class BillOfReceiving {
     Long billOfReceivingId;
 
     @ManyToOne
-    @JoinColumn(name = "bill_of_receiving_id", referencedColumnName = "client_info_id")
+    @JoinColumn(name = "client_info_id", referencedColumnName = "client_info_id")
     ClientInfo clientInfo;
+
+    @Column(name = "receiver_name", nullable = false, length = 100)
+    String receiverName;
 
     @DateTimeFormat
     @Column(name = "created_time", nullable = false, updatable = false,
         columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     LocalDateTime createdTime;
-
-    @Column(name = "receiver_name", nullable = false, length = 100)
-    String receiverName;
 }

@@ -3,7 +3,6 @@ package com.distributionsys.backend.services;
 import com.distributionsys.backend.dtos.general.ByIdDto;
 import com.distributionsys.backend.dtos.request.NewSupplierRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
-import com.distributionsys.backend.dtos.request.SupplierRequest;
 import com.distributionsys.backend.dtos.request.UpdateSupplierRequest;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.Supplier;
@@ -13,11 +12,9 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.mappers.SupplierMappers;
 import com.distributionsys.backend.repositories.GoodsRepository;
 import com.distributionsys.backend.repositories.SupplierRepository;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,7 +24,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class SupplierServices {
+public class SupplierService {
     SupplierRepository supplierRepository;
     GoodsRepository goodsRepository;
     PageMappers pageMappers;
@@ -45,9 +42,9 @@ public class SupplierServices {
                 .build();
         }
 
-        SupplierRequest supplierInfo;
+        Supplier supplierInfo;
         try {
-            supplierInfo = SupplierRequest.buildFromFilterHashMap(request.getFilterFields());
+            supplierInfo = Supplier.buildFromFilterHashMap(request.getFilterFields());
         } catch (ApplicationException | NullPointerException | IllegalArgumentException | NoSuchFieldException e) {
             throw new ApplicationException(ErrorCodes.INVALID_FILTERING_FIELD_OR_VALUE);
         }
@@ -74,7 +71,7 @@ public class SupplierServices {
         supplierRepository.deleteById(request.getId());
     }
 
-    public void updateSupplier(@Valid UpdateSupplierRequest request) {
+    public void updateSupplier(UpdateSupplierRequest request) {
         if (goodsRepository.existsBySupplierSupplierId(request.getSupplierId()))
             throw new ApplicationException(ErrorCodes.UPDATE_SUPPLIER);
         Supplier updatedSupplier = supplierRepository

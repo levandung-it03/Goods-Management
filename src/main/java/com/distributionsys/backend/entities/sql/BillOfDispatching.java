@@ -21,7 +21,7 @@ public class BillOfDispatching {
     Long billOfDispatchingId;
 
     @ManyToOne
-    @JoinColumn(name = "bill_of_dispatching_id", referencedColumnName = "client_info_id")
+    @JoinColumn(name = "client_info_id", referencedColumnName = "client_info_id")
     ClientInfo clientInfo;
 
     @DateTimeFormat

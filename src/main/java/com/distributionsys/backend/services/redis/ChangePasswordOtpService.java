@@ -1,6 +1,6 @@
 package com.distributionsys.backend.services.redis;
 
-import com.distributionsys.backend.entities.Auth.ChangePasswordOtp;
+import com.distributionsys.backend.entities.redis.ChangePasswordOtp;
 import com.distributionsys.backend.repositories.ChangePasswordOtpCrud;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class ChangePasswordOtpService {
     ChangePasswordOtpCrud otpCrud;
 
-    public ChangePasswordOtp save(ChangePasswordOtp otp) {
+    public com.distributionsys.backend.entities.redis.ChangePasswordOtp save(ChangePasswordOtp otp) {
         return otpCrud.save(otp);
     }
 

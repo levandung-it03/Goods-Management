@@ -37,9 +37,13 @@ public enum ErrorCodes {
     //--Enums(12)
     INVALID_GENDER_ID(12001, "Gender Id is invalid", BAD_REQUEST),
     //--Supplier(13)
-    DUPLICATE_SUPPLIER(13002, "Supplier is already exists!", BAD_REQUEST),
+    DUPLICATE_SUPPLIER(13001, "Supplier is already exists!", BAD_REQUEST),
     UPDATE_SUPPLIER(13002, "Supplier to be in used, please do not update it!", BAD_REQUEST),
     DELETE_SUPPLIER(13003, "Supplier to be in used, please do not delete it!", BAD_REQUEST),
+    //--Warehouse(14)
+    DUPLICATE_WAREHOUSE(14001, "Warehouse is already exists!", BAD_REQUEST),
+    UPDATE_WAREHOUSE(14002, "Warehouse to be in used, please do not update it!", BAD_REQUEST),
+    DELETE_WAREHOUSE(14003, "Warehouse to be in used, please do not delete it!", BAD_REQUEST),
     ;
 
     int code;

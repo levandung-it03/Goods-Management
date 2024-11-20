@@ -1,6 +1,5 @@
 package com.distributionsys.backend.repositories;
 
-import com.distributionsys.backend.dtos.request.SupplierRequest;
 import com.distributionsys.backend.entities.sql.Supplier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,13 +17,10 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
         SELECT s FROM Supplier s
         WHERE (:#{#filterObj.supplierName} IS NULL OR s.supplierName LIKE CONCAT('%', :#{#filterObj.supplierName}, '%'))
     """)
-    Page<Supplier> findAllBySupplierFilterInfo(
-        @Param("filterObj") SupplierRequest supplierInfo,
-        Pageable pageableCf
-    );
+    Page<Supplier> findAllBySupplierFilterInfo(@Param("filterObj") Supplier supplierInfo, Pageable pageableCf);
 
     @Query("""
-        UPDATE FROM Supplier s SET s.supplierName = :#{#newInfo.supplierName}
+        UPDATE Supplier s SET s.supplierName = :#{#newInfo.supplierName}
         WHERE s.supplierId = :#{#newInfo.supplierId}
     """)
     @Modifying

@@ -25,6 +25,11 @@ public enum SucceedCodes {
     ADD_SUPPLIER(23002, "Add Supplier successfully"),
     DELETE_SUPPLIER(23003, "Delete Supplier successfully"),
     UPDATE_SUPPLIER(23004, "Update Supplier successfully"),
+    //--Warehouse(23)
+    GET_WAREHOUSES_PAGES(24001, "Get Warehouses pages successfully"),
+    ADD_WAREHOUSE(24002, "Add Warehouse successfully"),
+    DELETE_WAREHOUSE(24003, "Delete Warehouse successfully"),
+    UPDATE_WAREHOUSE(24004, "Update Warehouse successfully"),
     ;
 
     int code;

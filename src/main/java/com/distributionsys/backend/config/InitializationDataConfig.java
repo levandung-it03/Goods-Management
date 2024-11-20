@@ -54,7 +54,7 @@ public class InitializationDataConfig implements CommandLineRunner {
             ));
             clientInfoRepository.save(ClientInfo.builder()
                 .firstName("Dung").lastName("Le Van").dob(LocalDate.of(2003, 12, 11))
-                .gender(Gender.MALE).user(users.getLast()).build());
+                .gender(Gender.MALE).phone("0112333444").user(users.getLast()).build());
         }
         invalidTokenCrud.deleteAll();
         refreshTokenCrud.deleteAll();
