@@ -31,6 +31,13 @@ b. Install Docker step by step:
 
 > docker run --name redis_latest_11_19_2024 -p 6379:6379 -d redis
 - Connect with MySQL "localhost:3306(root:sa)" by MySQL Workbench to test the installation result.
-- NOTE: always turn on all Docker containers before start Spring service. 
+- NOTE: always turn on all Docker containers before start Spring service.
+
+- To interact directly with MySQL from terminal.
+> docker exec -it goods_management mysql -p root -u
+
+> MySQL Password: sa
+
+> mysql> Something...
 
 c. Turn on Mobile hotspot (or using Ngrok) to public Spring APIs for ReactJS to code.
