@@ -70,4 +70,13 @@ public class PageObject {
             if (!res.isEmpty())  break;
         }
     }
+
+    public static String javaFieldToSqlColumn(String field) {
+        StringBuilder result = new StringBuilder();
+        for (char c: field.toCharArray()) {
+            if (c >= 65 && c <= 90) result.append("_").append(c + 32);
+            else result.append(c);
+        }
+        return result.toString();
+    }
 }

@@ -32,7 +32,6 @@ public class SupplierService {
 
     public TablePagesResponse<Supplier> getSuppliersPages(PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(Supplier.class);
-
         if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
             Page<Supplier> repoRes = supplierRepository.findAll(pageableCf);
             return TablePagesResponse.<Supplier>builder()
@@ -41,19 +40,17 @@ public class SupplierService {
                 .currentPage(request.getPage())
                 .build();
         }
-
-        Supplier supplierInfo;
         try {
-            supplierInfo = Supplier.buildFromFilterHashMap(request.getFilterFields());
+            var supplierInfo = Supplier.buildFromFilterHashMap(request.getFilterFields());
+            Page<Supplier> repoRes = supplierRepository.findAllBySupplierFilterInfo(supplierInfo, pageableCf);
+            return TablePagesResponse.<Supplier>builder()
+                .data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages())
+                .currentPage(request.getPage())
+                .build();
         } catch (ApplicationException | NullPointerException | IllegalArgumentException | NoSuchFieldException e) {
             throw new ApplicationException(ErrorCodes.INVALID_FILTERING_FIELD_OR_VALUE);
         }
-        Page<Supplier> repoRes = supplierRepository.findAllBySupplierFilterInfo(supplierInfo, pageableCf);
-        return TablePagesResponse.<Supplier>builder()
-            .data(repoRes.stream().toList())
-            .totalPages(repoRes.getTotalPages())
-            .currentPage(request.getPage())
-            .build();
     }
 
     public void addSupplier(NewSupplierRequest request) {

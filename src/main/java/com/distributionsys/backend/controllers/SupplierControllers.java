@@ -23,26 +23,26 @@ import org.springframework.web.bind.annotation.*;
 public class SupplierControllers {
     SupplierService supplierService;
 
-    @GetMapping("/admin/v1/get-suppliers-pages")
+    @GetMapping("/user/v1/get-suppliers-pages")
     public ResponseEntity<ApiResponseObject<TablePagesResponse<Supplier>>> getSuppliersPages(
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_SUPPLIERS_PAGES,
             supplierService.getSuppliersPages(request));
     }
 
-    @PostMapping("/admin/v1/add-supplier")
+    @PostMapping("/user/v1/add-supplier")
     public ResponseEntity<ApiResponseObject<Void>> addSupplier(@Valid @RequestBody NewSupplierRequest request) {
         supplierService.addSupplier(request);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.ADD_SUPPLIER);
     }
 
-    @PutMapping("/admin/v1/update-supplier")
+    @PutMapping("/user/v1/update-supplier")
     public ResponseEntity<ApiResponseObject<Void>> updateSupplier(@Valid @RequestBody UpdateSupplierRequest request) {
         supplierService.updateSupplier(request);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.UPDATE_SUPPLIER);
     }
 
-    @PostMapping("/admin/v1/delete-supplier")
+    @PostMapping("/user/v1/delete-supplier")
     public ResponseEntity<ApiResponseObject<Void>> deleteSupplier(@Valid @RequestBody ByIdDto request) {
         supplierService.deleteSupplier(request);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.DELETE_SUPPLIER);

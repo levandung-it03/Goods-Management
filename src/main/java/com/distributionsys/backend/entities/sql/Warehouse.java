@@ -1,6 +1,5 @@
 package com.distributionsys.backend.entities.sql;
 
-import com.distributionsys.backend.exceptions.ApplicationException;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -28,7 +27,7 @@ public class Warehouse {
     String address;
 
     public static Warehouse buildFormFilterHashMap(HashMap<String, Object> map)
-        throws NullPointerException, ApplicationException, IllegalArgumentException, NoSuchFieldException {
+        throws NullPointerException, IllegalArgumentException, NoSuchFieldException {
         for (String key : map.keySet())
             if (Arrays.stream(Warehouse.class.getDeclaredFields())
                 .noneMatch(f -> f.getName().equals(key)))

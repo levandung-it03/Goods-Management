@@ -32,7 +32,6 @@ public class WarehouseService {
 
     public TablePagesResponse<Warehouse> getWarehousesPages(PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(Warehouse.class);
-
         if (Objects.isNull(request) || request.getFilterFields().isEmpty()) {
             Page<Warehouse> repoRes = warehouseRepository.findAll(pageableCf);
             return TablePagesResponse.<Warehouse>builder()
@@ -41,20 +40,17 @@ public class WarehouseService {
                 .currentPage(request.getPage())
                 .build();
         }
-
-        Warehouse warehouseInfo;
         try {
-            warehouseInfo = Warehouse.buildFormFilterHashMap(request.getFilterFields());
+            var warehouseInfo = Warehouse.buildFormFilterHashMap(request.getFilterFields());
+            Page<Warehouse> repoRes = warehouseRepository.findAllByWarehouseFilterInfo(warehouseInfo, pageableCf);
+            return TablePagesResponse.<Warehouse>builder()
+                .data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages())
+                .currentPage(request.getPage())
+                .build();
         } catch (ApplicationException | NullPointerException | IllegalArgumentException | NoSuchFieldException e) {
             throw new ApplicationException(ErrorCodes.INVALID_FILTERING_FIELD_OR_VALUE);
         }
-
-        Page<Warehouse> repoRes = warehouseRepository.findAllByWarehouseFilterInfo(warehouseInfo, pageableCf);
-        return TablePagesResponse.<Warehouse>builder()
-            .data(repoRes.stream().toList())
-            .totalPages(repoRes.getTotalPages())
-            .currentPage(request.getPage())
-            .build();
     }
 
     public void addWarehouse(NewWarehouseRequest request) {

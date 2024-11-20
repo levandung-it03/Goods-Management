@@ -30,6 +30,9 @@ public enum SucceedCodes {
     ADD_WAREHOUSE(24002, "Add Warehouse successfully"),
     DELETE_WAREHOUSE(24003, "Delete Warehouse successfully"),
     UPDATE_WAREHOUSE(24004, "Update Warehouse successfully"),
+    //--Goods(24)
+    GET_WAREHOUSE_GOODS_PAGES(25001, "Get Goods from each Warehouse pages successfully"),
+    GET_SIMPLE_GOODS_PAGES(25002, "Get Simple Goods information pages successfully"),
     ;
 
     int code;

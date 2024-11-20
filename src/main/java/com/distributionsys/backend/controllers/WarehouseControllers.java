@@ -23,26 +23,26 @@ import org.springframework.web.bind.annotation.*;
 public class WarehouseControllers {
     WarehouseService warehouseService;
 
-    @GetMapping("/admin/v1/get-warehouses-pages")
+    @GetMapping("/user/v1/get-warehouses-pages")
     public ResponseEntity<ApiResponseObject<TablePagesResponse<Warehouse>>> getWarehousesPages(
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_WAREHOUSES_PAGES,
             warehouseService.getWarehousesPages(request));
     }
 
-    @PostMapping("/admin/v1/add-warehouse")
+    @PostMapping("/user/v1/add-warehouse")
     public ResponseEntity<ApiResponseObject<Void>> addWarehouse(@Valid @RequestBody NewWarehouseRequest request) {
         warehouseService.addWarehouse(request);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.ADD_WAREHOUSE);
     }
 
-    @PutMapping("/admin/v1/update-warehouse")
+    @PutMapping("/user/v1/update-warehouse")
     public ResponseEntity<ApiResponseObject<Void>> updateWarehouse(@Valid @RequestBody UpdateWarehouseRequest request) {
         warehouseService.updateWarehouse(request);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.UPDATE_WAREHOUSE);
     }
 
-    @PostMapping("/admin/v1/delete-warehouse")
+    @PostMapping("/user/v1/delete-warehouse")
     public ResponseEntity<ApiResponseObject<Void>> deleteWarehouse(@Valid @RequestBody ByIdDto request) {
         warehouseService.deleteWarehouse(request);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.DELETE_WAREHOUSE);

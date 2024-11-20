@@ -12,6 +12,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TablePagesResponse<T> {
     List<T> data;
-    int currentPage;
-    int totalPages;
+    Integer currentPage;
+    Integer totalPages;
 }

@@ -11,7 +11,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "goods")
+@Table(name = "goods", indexes = @Index(name = "name_cln_index", columnList = "goods_name"))
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Goods {
     @Id
@@ -19,7 +19,7 @@ public class Goods {
     @Column(name = "goods_id")
     Long goodsId;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "warehouse_goods",
         joinColumns = @JoinColumn(name = "goods_id", referencedColumnName = "goods_id"),
@@ -28,7 +28,7 @@ public class Goods {
     Collection<Warehouse> warehouses;
 
     @OneToOne
-    @JoinColumn(name = "goods_id", referencedColumnName = "supplier_id")
+    @JoinColumn(name = "supplier_id", referencedColumnName = "supplier_id")
     Supplier supplier;
 
     @Column(name = "goods_name", nullable = false, length = 100)
