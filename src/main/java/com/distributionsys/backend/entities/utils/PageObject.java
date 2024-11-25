@@ -49,10 +49,10 @@ public class PageObject {
     }
 
     /**
-     * Example: From BillOfReceivingGoods Table (seeing goods of receiving-bill), sorting "supplierName" of this goods
+     * Example: From ImportBillWarehouseGoods Table (seeing goods of import-bill), sorting "supplierName" of this goods
      * Reason: Because this entity is just a relationship-entity, it won't be shown separated and will be shown in
-     * Input: supplierName, emptyResult, new StringBuilder(), BillOfReceivingGoods.class
-     * Output: BillOfReceivingGoods.goods.supplier.supplierName
+     * Input: supplierName, emptyResult, new StringBuilder(), ImportBillWarehouseGoods.class
+     * Output: ImportBillWarehouseGoods.warehouseGoods.goods.supplier.supplierName
      * */
     public void verifyAndBuildSortingFieldRecursion(String inp, StringBuilder res, StringBuilder directoryCls,
                                                     Class<?> rootClass) {

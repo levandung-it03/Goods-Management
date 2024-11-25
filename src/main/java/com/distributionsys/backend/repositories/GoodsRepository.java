@@ -2,7 +2,9 @@ package com.distributionsys.backend.repositories;
 
 import com.distributionsys.backend.annotations.dev.OptimizedQuery;
 import com.distributionsys.backend.entities.sql.Goods;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -31,4 +33,25 @@ public interface GoodsRepository extends JpaRepository<Goods, Long> {
         @Param("goodsName") String goodsName,
         @Param("pageSize") Integer pageSize,
         @Param("currentPage") Integer currentPage);
+
+    @Query("""
+        SELECT CASE WHEN COUNT(g) > 0 THEN TRUE ELSE FALSE END FROM Goods g
+        WHERE LOWER(g.goodsName) = LOWER(:findingName) AND LOWER(g.goodsName) <> LOWER(:ignoredName)
+    """)
+    boolean existsByGoodsNameIgnoreUpdatedCase(
+        @Param("findingName") String findingName,
+        @Param("ignoredName") String ignoredName);
+
+    boolean existsByGoodsName(String goodsName);
+
+    @Transactional
+    @Modifying
+    @Query("""
+        UPDATE Goods g
+        SET g.goodsName = :#{#newInfo.goodsName},
+            g.supplier = :#{#newInfo.supplier},
+            g.unitPrice = :#{#newInfo.unitPrice}
+        WHERE g.goodsId = :#{#newInfo.goodsId}
+    """)
+    void updateGoodsByGoodsInfo(@Param("newInfo") Goods build);
 }

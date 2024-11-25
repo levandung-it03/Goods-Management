@@ -63,17 +63,20 @@ public class SupplierService {
         if (goodsRepository.existsBySupplierSupplierId(request.getId()))
             throw new ApplicationException(ErrorCodes.DELETE_SUPPLIER);
         //--Catch error before JPA does it to make returned message more meaningful.
-        if (supplierRepository.existsById(request.getId()))
+        if (!supplierRepository.existsById(request.getId()))
             throw new ApplicationException(ErrorCodes.INVALID_PRIMARY);
         supplierRepository.deleteById(request.getId());
     }
 
     public void updateSupplier(UpdateSupplierRequest request) {
-        if (goodsRepository.existsBySupplierSupplierId(request.getSupplierId()))
-            throw new ApplicationException(ErrorCodes.UPDATE_SUPPLIER);
         Supplier updatedSupplier = supplierRepository
             .findById(request.getSupplierId())
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_PRIMARY));
+        if (goodsRepository.existsBySupplierSupplierId(request.getSupplierId()))
+            throw new ApplicationException(ErrorCodes.UPDATE_SUPPLIER);
+        if (supplierRepository.existsBySupplierNameIgnoreUpdatedCase(request.getSupplierName(),
+            updatedSupplier.getSupplierName()))
+            throw new ApplicationException(ErrorCodes.DUPLICATE_SUPPLIER);
         supplierMappers.updateSupplier(updatedSupplier, request);
         supplierRepository.updateSupplierBySupplierInfo(updatedSupplier);
     }

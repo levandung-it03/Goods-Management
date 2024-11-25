@@ -31,8 +31,17 @@ public enum SucceedCodes {
     DELETE_WAREHOUSE(24003, "Delete Warehouse successfully"),
     UPDATE_WAREHOUSE(24004, "Update Warehouse successfully"),
     //--Goods(24)
-    GET_WAREHOUSE_GOODS_PAGES(25001, "Get Goods from each Warehouse pages successfully"),
+    GET_FULL_INFO_GOODS_PAGES(25001, "Get Goods from each Warehouse pages successfully"),
     GET_SIMPLE_GOODS_PAGES(25002, "Get Simple Goods information pages successfully"),
+    ADD_GOODS(25003, "Add new Goods successfully"),
+    UPDATE_GOODS(25004, "Update Goods successfully"),
+    DELETE_GOODS(25005, "Delete Goods successfully"),
+    GET_FULL_INFO_GOODS_PAGES_BY_IP_BILL(25006, "Get Goods from each Warehouse pages of Import Bill successfully"),
+    GET_FULL_INFO_GOODS_PAGES_BY_EX_BILL(25007, "Get Goods from each Warehouse pages of Export Bill successfully"),
+    //--ImportBill(25)
+    GET_IMPORT_BILL_PAGES(26001, "Get Import Bill pages successfully"),
+    ADD_IMPORT_BILL(26002, "Add new Import Bill successfully"),
+    DISCARD_IMPORT_BILL(26003, "Discard Import Bill successfully"),
     ;
 
     int code;

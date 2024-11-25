@@ -19,13 +19,18 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
     """)
     Page<Supplier> findAllBySupplierFilterInfo(@Param("filterObj") Supplier supplierInfo, Pageable pageableCf);
 
-    @Query("""
-        UPDATE Supplier s SET s.supplierName = :#{#newInfo.supplierName}
-        WHERE s.supplierId = :#{#newInfo.supplierId}
-    """)
-    @Modifying
     @Transactional
+    @Modifying
+    @Query("UPDATE Supplier s SET s.supplierName = :#{#newInfo.supplierName} WHERE s.supplierId = :#{#newInfo.supplierId}")
     void updateSupplierBySupplierInfo(@Param("newInfo") Supplier supplier);
+
+    @Query("""
+        SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END FROM Supplier s
+        WHERE LOWER(s.supplierName) = LOWER(:findingName) AND LOWER(s.supplierName) <> LOWER(:ignoredName)
+    """)
+    boolean existsBySupplierNameIgnoreUpdatedCase(
+        @Param("findingName") String findingName,
+        @Param("ignoredName") String ignoredName);
 
     boolean existsBySupplierName(String supplierName);
 }

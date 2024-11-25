@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "bill_of_dispatching")
+@Table(name = "import_bill", indexes = @Index(name = "created_time_index", columnList = "createdTime"))
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BillOfDispatching {
+public class ImportBill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "bill_of_dispatching_id")
-    Long billOfDispatchingId;
+    @Column(name = "import_bill_id")
+    Long importBillId;
 
     @ManyToOne
     @JoinColumn(name = "client_info_id", referencedColumnName = "client_info_id")
@@ -28,4 +28,7 @@ public class BillOfDispatching {
     @Column(name = "created_time", nullable = false, updatable = false,
         columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     LocalDateTime createdTime;
+
+    @Column(name = "import_bill_status")
+    Boolean importBillStatus;
 }

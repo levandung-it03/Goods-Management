@@ -62,7 +62,7 @@ public class WarehouseService {
     public void deleteWarehouse(ByIdDto request) {
         if (warehouseGoodsRepository.existsByWarehouseWarehouseId(request.getId()))
             throw new ApplicationException(ErrorCodes.DELETE_WAREHOUSE);
-        if (warehouseRepository.existsById(request.getId()))
+        if (!warehouseRepository.existsById(request.getId()))
             throw new ApplicationException(ErrorCodes.INVALID_PRIMARY);
         warehouseRepository.deleteById(request.getId());
     }

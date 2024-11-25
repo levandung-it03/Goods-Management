@@ -11,7 +11,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "warehouse_goods")
+@Table(
+    name = "warehouse_goods",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"goods_id", "warehouse_id"}),
+    indexes = @Index(name = "goods_id_cln_index", columnList = "goods_id")
+)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WarehouseGoods {
     @Id

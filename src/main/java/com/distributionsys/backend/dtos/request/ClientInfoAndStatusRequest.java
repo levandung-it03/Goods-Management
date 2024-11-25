@@ -28,7 +28,7 @@ public class ClientInfoAndStatusRequest {
     Boolean active;
 
     public static ClientInfoAndStatusRequest buildFromHashMap(HashMap<String, Object> map)
-        throws ApplicationException, NoSuchFieldException, IllegalArgumentException, NullPointerException {
+        throws NoSuchFieldException, IllegalArgumentException, NullPointerException {
         for (String key : map.keySet())
             if (Arrays.stream(ClientInfoAndStatusRequest.class.getDeclaredFields())
                 .noneMatch(f -> f.getName().equals(key))) throw new NoSuchFieldException();

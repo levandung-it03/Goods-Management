@@ -7,8 +7,8 @@
 - Manage Suppliers: GET, POST, PUT, DELETE
 - Manage Warehouses: GET, POST, PUT, DELETE
 - Manage All Goods (Warehouse_Goods): GET, POST, PUT, DELETE
-- Manage Bill Of Receiving (BillOfReceiving_Goods): GET, POST, DELETE
-- Manage Bill Of Dispatching (BillOfDispatching_Goods): GET, POST, DELETE
+- Manage Import Bill (ImportBill_Goods): GET, POST, DELETE
+- Manage Export Bill (ExportBill_Goods): GET, POST, DELETE
 # II. Installation: #
 ### 1. Services:
 > https://www.docker.com/products/docker-desktop/

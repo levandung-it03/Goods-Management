@@ -44,6 +44,10 @@ public enum ErrorCodes {
     DUPLICATE_WAREHOUSE(14001, "Warehouse is already exists!", BAD_REQUEST),
     UPDATE_WAREHOUSE(14002, "Warehouse to be in used, please do not update it!", BAD_REQUEST),
     DELETE_WAREHOUSE(14003, "Warehouse to be in used, please do not delete it!", BAD_REQUEST),
+    //--Goods(15)
+    DUPLICATE_GOODS(15001, "Goods name is already exists!", BAD_REQUEST),
+    UPDATE_GOODS(15002, "Goods to be in used, please do not update it!", BAD_REQUEST),
+    DELETE_GOODS(15003, "Goods to be in used, please do not delete it!", BAD_REQUEST),
     ;
 
     int code;
