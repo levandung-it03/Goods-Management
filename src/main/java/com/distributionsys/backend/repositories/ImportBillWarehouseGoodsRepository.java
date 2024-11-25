@@ -26,12 +26,17 @@ public interface ImportBillWarehouseGoodsRepository extends JpaRepository<Import
     @Query("""
         SELECT r.warehouseGoods FROM ImportBillWarehouseGoods r
         WHERE r.importBill.importBillId = :billId
-        AND (:#{#filterObj.warehouseName} IS NULL OR r.warehouseGoods.warehouse.warehouseName LIKE CONCAT('%',:#{#filterObj.warehouseName},'%'))
-        AND (:#{#filterObj.goodsName} IS NULL OR r.warehouseGoods.goods.goodsName LIKE CONCAT('%',:#{#filterObj.goodsName},'%'))
-        AND (:#{#filterObj.supplierName} IS NULL OR r.warehouseGoods.goods.supplier.supplierName LIKE CONCAT('%',:#{#filterObj.supplierName},'%'))
-        AND (:#{#filterObj.address} IS NULL OR r.warehouseGoods.warehouse.address LIKE CONCAT('%',:#{#filterObj.address},'%'))
+        AND (:#{#filterObj.warehouseName} IS NULL
+            OR r.warehouseGoods.warehouse.warehouseName LIKE CONCAT('%',:#{#filterObj.warehouseName},'%'))
+        AND (:#{#filterObj.goodsName} IS NULL
+            OR r.warehouseGoods.goods.goodsName LIKE CONCAT('%',:#{#filterObj.goodsName},'%'))
+        AND (:#{#filterObj.supplierName} IS NULL
+            OR r.warehouseGoods.goods.supplier.supplierName LIKE CONCAT('%',:#{#filterObj.supplierName},'%'))
+        AND (:#{#filterObj.address} IS NULL
+            OR r.warehouseGoods.warehouse.address LIKE CONCAT('%',:#{#filterObj.address},'%'))
         AND (:#{#filterObj.unitPrice} IS NULL OR r.warehouseGoods.goods.unitPrice = :#{#filterObj.unitPrice})
-        AND (:#{#filterObj.currentQuantity} IS NULL OR r.warehouseGoods.currentQuantity = :#{#filterObj.currentQuantity})
+        AND (:#{#filterObj.currentQuantity} IS NULL
+            OR r.warehouseGoods.currentQuantity = :#{#filterObj.currentQuantity})
         ORDER BY r.warehouseGoods.goods.goodsName ASC
     """)
     Page<WarehouseGoods> findWarehouseGoodsAllByImportBillId(

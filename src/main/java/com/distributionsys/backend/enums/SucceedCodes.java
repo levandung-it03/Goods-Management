@@ -42,6 +42,7 @@ public enum SucceedCodes {
     GET_IMPORT_BILL_PAGES(26001, "Get Import Bill pages successfully"),
     ADD_IMPORT_BILL(26002, "Add new Import Bill successfully"),
     DISCARD_IMPORT_BILL(26003, "Discard Import Bill successfully"),
+    CREATE_IMPORT_BILL(26004, "Create Import Bill successfully"),
     ;
 
     int code;

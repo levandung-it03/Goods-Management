@@ -1,5 +1,6 @@
 package com.distributionsys.backend.controllers;
 
+import com.distributionsys.backend.dtos.request.NewImportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
@@ -11,10 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/private")
@@ -29,5 +27,13 @@ public class ImportBillControllers {
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_IMPORT_BILL_PAGES,
             importBillService.getImportBillPages(accessToken, request));
+    }
+
+    @GetMapping("/user/v1/create-import-bill")
+    public ResponseEntity<ApiResponseObject<Void>> createImportBill(
+        @RequestHeader("Authorization") String accessToken,
+        @Valid @RequestBody NewImportBillRequest request) {
+        importBillService.createImportBill(accessToken, request);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.CREATE_IMPORT_BILL);
     }
 }
