@@ -12,6 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    @Query("SELECt COUNT(u) from User AS u WHERE u.active = true")
+    Long countActiveUser();
+
+    @Query("SELECt COUNT(u) from User AS u WHERE u.active = false")
+    Long countInactiveUser();
+
     Optional<User> findByEmail(String email);
 
     @Transactional

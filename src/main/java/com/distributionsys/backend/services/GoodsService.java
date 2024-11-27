@@ -42,6 +42,10 @@ public class GoodsService {
     SupplierRepository supplierRepository;
     PageMappers pageMappers;
 
+    public long getTotalGoods() {
+        return this.goodsRepository.count();
+    }
+
     public TablePagesResponse<WarehouseGoods> getFullInfoGoodsPages(PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(WarehouseGoods.class);
         if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
