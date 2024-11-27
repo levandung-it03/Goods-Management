@@ -45,6 +45,7 @@ public enum SucceedCodes {
 
     //--Admin(27)
     GET_TOTAL_CLIENT(27001, "Clients found successfully"),
+    DEACTIVATE_CLIENT(27002, "Deactivate client successfully"),
     ;
 
     int code;
