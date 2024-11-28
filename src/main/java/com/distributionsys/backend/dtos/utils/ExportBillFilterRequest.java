@@ -17,7 +17,6 @@ public class ExportBillFilterRequest {
     String receiverName;
     LocalDateTime fromCreatedTime;
     LocalDateTime toCreatedTime;
-    Boolean exportBillStatus;
 
     public static ExportBillFilterRequest buildFromFilterHashMap(HashMap<String, Object> map)
         throws NullPointerException, IllegalArgumentException, NoSuchFieldException {
@@ -32,8 +31,6 @@ public class ExportBillFilterRequest {
             : LocalDateTime.parse(map.get("fromCreatedTime").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.setToCreatedTime(!map.containsKey("toCreatedTime") ? null
             : LocalDateTime.parse(map.get("toCreatedTime").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        result.setExportBillStatus(!map.containsKey("exportBillStatus") ? null
-            : Boolean.parseBoolean(map.get("exportBillStatus").toString()));
         return result;
     }
 }

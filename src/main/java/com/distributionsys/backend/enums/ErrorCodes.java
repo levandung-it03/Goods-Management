@@ -28,6 +28,7 @@ public enum ErrorCodes {
     OTP_NOT_FOUND(10014, "OTP is wrong!", BAD_REQUEST),
     USER_EXISTING(10015, "User is already existing", BAD_REQUEST),
     RETRY_TOO_MANY_TIMES(10016, "There are too many threads working now, please try it later!" , BAD_REQUEST),
+    DATA_CAN_NOT_ROLLBACK_BY_VIOLATION(10017, "Can not complete action because of data violation", BAD_REQUEST),
     //--Auth(11)
     INVALID_CREDENTIALS(11001, "Email or Password is invalid", UNAUTHORIZED),
     INVALID_TOKEN(11002, "Token or its claims are invalid", UNAUTHORIZED),

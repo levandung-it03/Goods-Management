@@ -16,7 +16,6 @@ import java.util.HashMap;
 public class ImportBillFilterRequest {
     LocalDateTime fromCreatedTime;
     LocalDateTime toCreatedTime;
-    Boolean importBillStatus;
 
     public static ImportBillFilterRequest buildFromFilterHashMap(HashMap<String, Object> map)
         throws NullPointerException, IllegalArgumentException, NoSuchFieldException {
@@ -30,8 +29,6 @@ public class ImportBillFilterRequest {
             : LocalDateTime.parse(map.get("fromCreatedTime").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.setToCreatedTime(!map.containsKey("toCreatedTime") ? null
             : LocalDateTime.parse(map.get("toCreatedTime").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        result.setImportBillStatus(!map.containsKey("importBillStatus") ? null
-            : Boolean.parseBoolean(map.get("importBillStatus").toString()));
         return result;
     }
 }

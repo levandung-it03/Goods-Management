@@ -105,7 +105,7 @@ public class ExportBillService {
                 //--Save the rest data after all @Version entities are saved correctly.
                 var newExportBill = exportBillRepository.save(ExportBill.builder()
                     .clientInfo(clientInfo).createdTime(LocalDateTime.now()).receiverName(request.getReceiverName())
-                    .exportBillStatus(true).build());
+                    .build());
                 var newExportBillWhGoodsRelationship = new ArrayList<ExportBillWarehouseGoods>();
                 for (int index = 0; index < updatedWarehouseGoodsList.size(); index++) {
                     newExportBillWhGoodsRelationship.add(ExportBillWarehouseGoods.builder()

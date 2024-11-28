@@ -1,5 +1,6 @@
 package com.distributionsys.backend.services;
 
+import com.distributionsys.backend.dtos.general.ByIdDto;
 import com.distributionsys.backend.dtos.request.NewImportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
@@ -13,7 +14,6 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import jakarta.persistence.OptimisticLockException;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -136,8 +136,7 @@ public class ImportBillService {
 
                 //--Save the rest data after all @Version entities are saved correctly.
                 var newImportBill = importBillRepository.save(ImportBill.builder()
-                    .clientInfo(clientInfo).createdTime(LocalDateTime.now()).importBillStatus(true)
-                    .build());
+                    .clientInfo(clientInfo).createdTime(LocalDateTime.now()).build());
                 importBillWarehouseGoodsRepository.saveAll(savedWarehouseGoodsList.stream().map(whGoods ->
                     ImportBillWarehouseGoods.builder()
                         .warehouseGoods(whGoods)

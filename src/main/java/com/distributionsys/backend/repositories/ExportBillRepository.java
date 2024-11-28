@@ -22,7 +22,6 @@ public interface ExportBillRepository extends JpaRepository<ExportBill, Long> {
         AND (:#{#filterObj.receiverName} IS NULL OR b.receiverName LIKE CONCAT('%',:#{#filterObj.receiverName},'%'))
         AND (:#{#filterObj.fromCreatedTime} IS NULL OR :#{#filterObj.fromCreatedTime} <= b.createdTime)
         AND (:#{#filterObj.toCreatedTime} IS NULL OR b.createdTime <= :#{#filterObj.toCreatedTime})
-        AND (:#{#filterObj.exportBillStatus} IS NULL OR b.exportBillStatus = :#{#filterObj.exportBillStatus})
         ORDER BY b.createdTime DESC
     """)
     Page<ExportBill> findAllByClientInfoClientInfoId(

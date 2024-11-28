@@ -21,7 +21,6 @@ public interface ImportBillRepository extends JpaRepository<ImportBill, Long> {
         WHERE b.clientInfo.clientInfoId = :clientInfoId
         AND (:#{#filterObj.fromCreatedTime} IS NULL OR :#{#filterObj.fromCreatedTime} <= b.createdTime)
         AND (:#{#filterObj.toCreatedTime} IS NULL OR b.createdTime <= :#{#filterObj.toCreatedTime})
-        AND (:#{#filterObj.importBillStatus} IS NULL OR b.importBillStatus = :#{#filterObj.importBillStatus})
         ORDER BY b.createdTime DESC
     """)
     Page<ImportBill> findAllByClientInfoClientInfoId(
