@@ -5,6 +5,7 @@ import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.ImportBillFilterRequest;
 import com.distributionsys.backend.entities.sql.ImportBill;
+import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
 import com.distributionsys.backend.enums.ErrorCodes;
 import com.distributionsys.backend.exceptions.ApplicationException;
@@ -12,23 +13,36 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import jakarta.persistence.OptimisticLockException;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
 @Service
+@EnableAsync
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ImportBillService {
+    PlatformTransactionManager transactionManager;
     WarehouseGoodsRepository warehouseGoodsRepository;
+    ImportBillWarehouseGoodsRepository importBillWarehouseGoodsRepository;
     ImportBillRepository importBillRepository;
     ClientInfoRepository clientInfoRepository;
     GoodsRepository goodsRepository;
@@ -66,6 +80,7 @@ public class ImportBillService {
         }
     }
 
+    @Async
     public void createImportBill(String accessToken, NewImportBillRequest request) {
         var clientInfo = clientInfoRepository
             .findByUserEmail(jwtService.readPayload(accessToken).get("sub"))
@@ -75,49 +90,71 @@ public class ImportBillService {
         var warehouseListInOrder = warehouseRepository.findAllById(request.getImportedWarehouseGoods().stream()
             .map(NewImportBillRequest.ImportedWarehouseGoodsDto::getWarehouseId).toList());
         var builtWarehouseGoodsIdPairs = new HashMap<String, Long>();
-        request.getImportedWarehouseGoods().forEach(reqObj -> builtWarehouseGoodsIdPairs.put(
-            reqObj.getGoodsId() + "," + reqObj.getWarehouseId(),
-            reqObj.getImportedGoodsQuantity()
-        ));
+        for (NewImportBillRequest.ImportedWarehouseGoodsDto reqObj : request.getImportedWarehouseGoods())
+            builtWarehouseGoodsIdPairs
+                .put(reqObj.getGoodsId() + "," + reqObj.getWarehouseId(), reqObj.getImportedGoodsQuantity());
 
-        while (true) {
+        int MAX_RETRY = 10;
+        for (int times = 1; times <= MAX_RETRY; times++) {
+            var foundWarehouseGoodsList = warehouseGoodsRepository.findAllByGoodsIdAndWarehouseIdPairs(
+                builtWarehouseGoodsIdPairs.keySet().stream().toList());
+            //--Use Hashmap Markers for better finding id-pairs performance
+            var updatedWhGoodsMarkers = new HashMap<String, WarehouseGoods>();
+            for (WarehouseGoods foundObj : foundWarehouseGoodsList) {
+                var key = foundObj.getGoods().getGoodsId() + "," + foundObj.getWarehouse().getWarehouseId();
+                //--Create existing WarehouseGoods Markers
+                updatedWhGoodsMarkers.put(key, foundObj);
+                //--Borrow this iteration to update goodsQuantity in Warehouse.
+                foundObj.setCurrentQuantity(foundObj.getCurrentQuantity() + builtWarehouseGoodsIdPairs.get(key));
+            }
+            var savedWarehouseGoodsList = new ArrayList<WarehouseGoods>();
+            for (int index = 0; index < request.getImportedWarehouseGoods().size(); index++) {
+                var currentWarehouseGoods = request.getImportedWarehouseGoods().get(index);
+                var updatedWarehouseGoods = updatedWhGoodsMarkers
+                    .get(currentWarehouseGoods.getGoodsId() + "," + currentWarehouseGoods.getWarehouseId());
+                if (Objects.isNull(updatedWarehouseGoods))
+                    savedWarehouseGoodsList.add(WarehouseGoods.builder()
+                        .goods(goodsListInOrder.get(index))
+                        .warehouse(warehouseListInOrder.get(index))
+                        .currentQuantity(currentWarehouseGoods.getImportedGoodsQuantity())
+                        .build());
+                else    savedWarehouseGoodsList.add(updatedWarehouseGoods);
+            }
+
+            var transDef = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED);
+            TransactionStatus transStatus = transactionManager.getTransaction(transDef);
             try {
-                var foundWarehouseGoodsList = warehouseGoodsRepository.findAllByGoodsIdAndWarehouseIdPairs(
-                    builtWarehouseGoodsIdPairs.keySet().stream().toList());
-                //--Use Hashmap Markers for better finding id-pairs performance
-                var warehouseGoodsMarkers = new HashMap<String, WarehouseGoods>();
-                for (WarehouseGoods warehouseGoods : foundWarehouseGoodsList) {
-                    var key = warehouseGoods.getGoods().getGoodsId()
-                        + "," + warehouseGoods.getWarehouse().getWarehouseId();
-                    //--Create existing WarehouseGoods Markers
-                    warehouseGoodsMarkers.put(key, warehouseGoods);
-                    //--Borrow this iteration to update goodsQuantity in Warehouse.
-                    warehouseGoods.setCurrentQuantity(
-                        warehouseGoods.getCurrentQuantity() + builtWarehouseGoodsIdPairs.get(key));
+                try {
+                    //--May throw DataIntegrityViolationException when saving (null-id-value entities)
+                    //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
+                    warehouseGoodsRepository.saveAll(savedWarehouseGoodsList);
+                } catch (OptimisticLockException | DataIntegrityViolationException e) {
+                    log.info("Retry creating ImportBill by: {}", clientInfo.getClientInfoId());
+                    transactionManager.rollback(transStatus);   //--Clear Transaction
+                    continue;   //--Do it again
                 }
-                var savedWarehouseGoodsList = new ArrayList<WarehouseGoods>();
-                for (int index = 0; index < request.getImportedWarehouseGoods().size(); index++) {
-                    var updatedWarehouseGoods = warehouseGoodsMarkers.get(
-                        request.getImportedWarehouseGoods().get(index).getGoodsId()
-                            + "," + request.getImportedWarehouseGoods().get(index).getWarehouseId());
-                    if (Objects.isNull(updatedWarehouseGoods))
-                        savedWarehouseGoodsList.add(WarehouseGoods.builder()
-                            .goods(goodsListInOrder.get(index))
-                            .warehouse(warehouseListInOrder.get(index))
-                            .currentQuantity(request.getImportedWarehouseGoods().get(index).getImportedGoodsQuantity())
-                            .build());
-                    else
-                        savedWarehouseGoodsList.add(updatedWarehouseGoods);
-                }
-                //--May throw DataIntegrityViolationException when saving (null-id-value entities)
-                //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
-                warehouseGoodsRepository.saveAll(savedWarehouseGoodsList);
+
+                //--Save the rest data after all @Version entities are saved correctly.
+                var newImportBill = importBillRepository.save(ImportBill.builder()
+                    .clientInfo(clientInfo).createdTime(LocalDateTime.now()).importBillStatus(true)
+                    .build());
+                importBillWarehouseGoodsRepository.saveAll(savedWarehouseGoodsList.stream().map(whGoods ->
+                    ImportBillWarehouseGoods.builder()
+                        .warehouseGoods(whGoods)
+                        .importBill(newImportBill)
+                        .goodsQuantity(builtWarehouseGoodsIdPairs
+                            .get(whGoods.getGoods().getGoodsId() + "," + whGoods.getWarehouse().getWarehouseId()))
+                        .build()).toList());
+                transactionManager.commit(transStatus);
                 break;
-            } catch (OptimisticLockException | DataIntegrityViolationException e) {
-                System.out.println("Retry create ImportBill by: " + clientInfo.getFirstName() + clientInfo.getLastName());
             } catch (RuntimeException e) {
+                transactionManager.rollback(transStatus);
+                log.info("Unaware exception throw when working with Hibernate, ImportBill Transactional rollback!");
                 throw new ApplicationException(ErrorCodes.UNAWARE_ERR);
             }
         }
+
+        log.info("Too many threads on ImportBill");
+        throw new ApplicationException(ErrorCodes.RETRY_TOO_MANY_TIMES);
     }
 }

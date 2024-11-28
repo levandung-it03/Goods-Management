@@ -29,6 +29,9 @@ public class ExportBill {
         columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     LocalDateTime createdTime;
 
-    @Column(name = "export_bill_status")
+    @Column(name = "receiver_name", nullable = false, length = 200)
+    String receiverName;
+
+    @Column(name = "export_bill_status", nullable = false)
     Boolean exportBillStatus;
 }

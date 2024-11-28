@@ -29,6 +29,6 @@ public class ImportBill {
         columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     LocalDateTime createdTime;
 
-    @Column(name = "import_bill_status")
+    @Column(name = "import_bill_status", nullable = false)
     Boolean importBillStatus;
 }

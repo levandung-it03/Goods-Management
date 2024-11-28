@@ -34,6 +34,6 @@ public class ImportBillControllers {
         @RequestHeader("Authorization") String accessToken,
         @Valid @RequestBody NewImportBillRequest request) {
         importBillService.createImportBill(accessToken, request);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.CREATE_IMPORT_BILL);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.PENDING_IMPORT_BILL);
     }
 }

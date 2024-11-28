@@ -13,25 +13,27 @@ import java.util.HashMap;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ImportBillFilterRequest {
+public class ExportBillFilterRequest {
+    String receiverName;
     LocalDateTime fromCreatedTime;
     LocalDateTime toCreatedTime;
-    Boolean importBillStatus;
+    Boolean exportBillStatus;
 
-    public static ImportBillFilterRequest buildFromFilterHashMap(HashMap<String, Object> map)
+    public static ExportBillFilterRequest buildFromFilterHashMap(HashMap<String, Object> map)
         throws NullPointerException, IllegalArgumentException, NoSuchFieldException {
         for (String key: map.keySet())
-            if (Arrays.stream(ImportBillFilterRequest.class.getDeclaredFields())
+            if (Arrays.stream(ExportBillFilterRequest.class.getDeclaredFields())
                 .noneMatch(f -> f.getName().equals(key)))
                 throw new NoSuchFieldException();
 
-        var result = new ImportBillFilterRequest();
+        var result = new ExportBillFilterRequest();
+        result.setReceiverName(!map.containsKey("receiverName") ? null : map.get("receiverName").toString());
         result.setFromCreatedTime(!map.containsKey("fromCreatedTime") ? null
             : LocalDateTime.parse(map.get("fromCreatedTime").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.setToCreatedTime(!map.containsKey("toCreatedTime") ? null
             : LocalDateTime.parse(map.get("toCreatedTime").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        result.setImportBillStatus(!map.containsKey("importBillStatus") ? null
-            : Boolean.parseBoolean(map.get("importBillStatus").toString()));
+        result.setExportBillStatus(!map.containsKey("exportBillStatus") ? null
+            : Boolean.parseBoolean(map.get("exportBillStatus").toString()));
         return result;
     }
 }
