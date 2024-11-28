@@ -1,14 +1,11 @@
 package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.request.NewExportBillRequest;
-import com.distributionsys.backend.dtos.request.NewExportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.ExportBillFilterRequest;
 import com.distributionsys.backend.entities.sql.ExportBill;
-import com.distributionsys.backend.entities.sql.ExportBill;
 import com.distributionsys.backend.entities.sql.relationships.ExportBillWarehouseGoods;
-import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
 import com.distributionsys.backend.enums.ErrorCodes;
 import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
@@ -19,7 +16,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -32,7 +28,6 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
 @Service
@@ -87,19 +82,21 @@ public class ExportBillService {
 
         int MAX_RETRY = 10;
         for (int times = 1; times <= MAX_RETRY; times++) {
-            var updatedWarehouesGoodsList = warehouseGoodsRepository.findAllById(request.getExportedWarehouseGoods()
+            var updatedWarehouseGoodsList = warehouseGoodsRepository.findAllById(request.getExportedWarehouseGoods()
                 .stream().map(NewExportBillRequest.ExportedWarehouseGoodsDto::getWarehouseGoodsId).toList());
-            for (int index = 0; index < updatedWarehouesGoodsList.size(); index++)
-                updatedWarehouesGoodsList.get(index).setCurrentQuantity(
-                    updatedWarehouesGoodsList.get(index).getCurrentQuantity()
-                        + request.getExportedWarehouseGoods().get(index).getExportedGoodsQuantity());
-
+            for (int index = 0; index < updatedWarehouseGoodsList.size(); index++) {
+                var updatedQuantity = updatedWarehouseGoodsList.get(index).getCurrentQuantity()
+                    - request.getExportedWarehouseGoods().get(index).getExportedGoodsQuantity();
+                if (updatedQuantity < 0)
+                    throw new ApplicationException(ErrorCodes.NOT_ENOUGH_QUANTITY_TO_EXPORT);
+                updatedWarehouseGoodsList.get(index).setCurrentQuantity(updatedQuantity);
+            }
             var transDef = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED);
             TransactionStatus transStatus = transactionManager.getTransaction(transDef);
             try {
                 try {
                     //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
-                    warehouseGoodsRepository.saveAll(updatedWarehouesGoodsList);
+                    warehouseGoodsRepository.saveAll(updatedWarehouseGoodsList);
                 } catch (OptimisticLockException e) {
                     log.info("Retry creating ExportBill by: {}", clientInfo.getClientInfoId());
                     transactionManager.rollback(transStatus);   //--Clear Transaction
@@ -110,9 +107,9 @@ public class ExportBillService {
                     .clientInfo(clientInfo).createdTime(LocalDateTime.now()).receiverName(request.getReceiverName())
                     .exportBillStatus(true).build());
                 var newExportBillWhGoodsRelationship = new ArrayList<ExportBillWarehouseGoods>();
-                for (int index = 0; index < updatedWarehouesGoodsList.size(); index++) {
+                for (int index = 0; index < updatedWarehouseGoodsList.size(); index++) {
                     newExportBillWhGoodsRelationship.add(ExportBillWarehouseGoods.builder()
-                        .warehouseGoods(updatedWarehouesGoodsList.get(index))
+                        .warehouseGoods(updatedWarehouseGoodsList.get(index))
                         .exportBill(newExportBill)
                         .goodsQuantity(request.getExportedWarehouseGoods().get(index).getExportedGoodsQuantity())
                         .build());

@@ -49,6 +49,9 @@ public enum ErrorCodes {
     DUPLICATE_GOODS(15001, "Goods name is already exists!", BAD_REQUEST),
     UPDATE_GOODS(15002, "Goods to be in used, please do not update it!", BAD_REQUEST),
     DELETE_GOODS(15003, "Goods to be in used, please do not delete it!", BAD_REQUEST),
+    //--Import(16)
+    //--Export(17)
+    NOT_ENOUGH_QUANTITY_TO_EXPORT(17001, "Data updated and there are some Goods quantity doesn't have enough!", BAD_REQUEST),
     ;
 
     int code;
