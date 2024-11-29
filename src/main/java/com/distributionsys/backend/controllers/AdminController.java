@@ -14,7 +14,6 @@ import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.User;
-import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
 import com.distributionsys.backend.services.AdminService;
 

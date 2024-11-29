@@ -44,7 +44,6 @@ public enum SucceedCodes {
     DISCARD_IMPORT_BILL(26003, "Discard Import Bill successfully"),
     PENDING_IMPORT_BILL(26004, "Creating Import Bill request received by system, this may take a while!"),
     CREATE_IMPORT_BILL(26005, "New Import Bill has been created successfully!"),
-    DISCARD_IMPORT_BILL(26006, "Discard Import Bill successfully!"),
     //--ExportBill(27)
     GET_EXPORT_BILL_PAGES(27001, "Get Export Bill pages successfully"),
     PENDING_EXPORT_BILL(27002, "Creating Export Bill request received by system, this may take a while!"),

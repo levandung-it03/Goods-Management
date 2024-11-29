@@ -1,7 +1,6 @@
 package com.distributionsys.backend.repositories;
 
 import com.distributionsys.backend.dtos.utils.UserFilterRequest;
-import com.distributionsys.backend.dtos.utils.WarehouseGoodsFilterRequest;
 import com.distributionsys.backend.entities.sql.User;
 import jakarta.transaction.Transactional;
 
