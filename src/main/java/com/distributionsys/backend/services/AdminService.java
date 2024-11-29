@@ -1,7 +1,11 @@
 package com.distributionsys.backend.services;
 
+import java.time.LocalDateTime;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.distributionsys.backend.dtos.request.NewClientRequest;
 import com.distributionsys.backend.entities.sql.User;
 import com.distributionsys.backend.enums.ErrorCodes;
 import com.distributionsys.backend.exceptions.ApplicationException;
@@ -16,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminService {
     UserRepository userRepository;
+    private final PasswordEncoder userPasswordEncoder;
 
     public long getTotalClient() {
         return this.userRepository.count();
@@ -27,6 +32,20 @@ public class AdminService {
 
     public long getTotalInactiveClient() {
         return this.userRepository.countInactiveUser();
+    }
+
+    public User createClient(NewClientRequest request) {
+        userRepository
+            .findByEmail(request.getEmail())
+            .ifPresent(user -> {
+                throw new ApplicationException(ErrorCodes.USER_EXISTING);
+            });
+        var newUser = new User();
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(userPasswordEncoder.encode(request.getPassword()));
+        newUser.setCreatedTime(LocalDateTime.now());
+        newUser.setActive(true);
+        return userRepository.save(newUser);
     }
 
     public User deactivateClient(long userId) {

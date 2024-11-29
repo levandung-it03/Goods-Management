@@ -4,9 +4,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.distributionsys.backend.dtos.request.NewClientRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
 import com.distributionsys.backend.entities.sql.User;
 import com.distributionsys.backend.enums.SucceedCodes;
@@ -36,6 +39,11 @@ public class AdminController {
     @GetMapping("/admin/v1/count-total-inactive-clients")
     public ResponseEntity<ApiResponseObject<Long>> getTotalInactiveClient() {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_TOTAL_CLIENT, this.adminService.getTotalInactiveClient());
+    }
+
+    @PostMapping("/admin/v1/create-new-client")
+    public ResponseEntity<ApiResponseObject<User>> createNewClient(@RequestBody NewClientRequest request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.NEW_CLIENT_CREATED, this.adminService.createClient(request));
     }
 
     @PatchMapping("/admin/v1/deactivate-client/{userId}")
