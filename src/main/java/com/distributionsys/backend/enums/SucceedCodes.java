@@ -25,12 +25,12 @@ public enum SucceedCodes {
     ADD_SUPPLIER(23002, "Add Supplier successfully"),
     DELETE_SUPPLIER(23003, "Delete Supplier successfully"),
     UPDATE_SUPPLIER(23004, "Update Supplier successfully"),
-    //--Warehouse(23)
+    //--Warehouse(24)
     GET_WAREHOUSES_PAGES(24001, "Get Warehouses pages successfully"),
     ADD_WAREHOUSE(24002, "Add Warehouse successfully"),
     DELETE_WAREHOUSE(24003, "Delete Warehouse successfully"),
     UPDATE_WAREHOUSE(24004, "Update Warehouse successfully"),
-    //--Goods(24)
+    //--Goods(25)
     GET_FULL_INFO_GOODS_PAGES(25001, "Get Goods from each Warehouse pages successfully"),
     GET_SIMPLE_GOODS_PAGES(25002, "Get Simple Goods information pages successfully"),
     ADD_GOODS(25003, "Add new Goods successfully"),
@@ -38,16 +38,21 @@ public enum SucceedCodes {
     DELETE_GOODS(25005, "Delete Goods successfully"),
     GET_FULL_INFO_GOODS_PAGES_BY_IP_BILL(25006, "Get Goods from each Warehouse pages of Import Bill successfully"),
     GET_FULL_INFO_GOODS_PAGES_BY_EX_BILL(25007, "Get Goods from each Warehouse pages of Export Bill successfully"),
-    //--ImportBill(25)
+    //--ImportBill(26)
     GET_IMPORT_BILL_PAGES(26001, "Get Import Bill pages successfully"),
     ADD_IMPORT_BILL(26002, "Add new Import Bill successfully"),
     DISCARD_IMPORT_BILL(26003, "Discard Import Bill successfully"),
-
-    //--Admin(27)
-    GET_TOTAL_CLIENT(27001, "Clients found successfully"),
-    DEACTIVATE_CLIENT(27002, "Deactivate client successfully"),
-    NEW_CLIENT_CREATED(27003, "New client created successfully"),
-    GET_CLIENTS(27004, "Clients found successfully"),
+    PENDING_IMPORT_BILL(26004, "Creating Import Bill request received by system, this may take a while!"),
+    CREATE_IMPORT_BILL(26005, "New Import Bill has been created successfully!"),
+    DISCARD_IMPORT_BILL(26006, "Discard Import Bill successfully!"),
+    //--ExportBill(27)
+    GET_EXPORT_BILL_PAGES(27001, "Get Export Bill pages successfully"),
+    PENDING_EXPORT_BILL(27002, "Creating Export Bill request received by system, this may take a while!"),
+    //--Admin(28)
+    GET_TOTAL_CLIENT(28001, "Clients found successfully"),
+    DEACTIVATE_CLIENT(28002, "Deactivate client successfully"),
+    NEW_CLIENT_CREATED(28003, "New client created successfully"),
+    GET_CLIENTS(28004, "Clients found successfully"),
     ;
 
     int code;
