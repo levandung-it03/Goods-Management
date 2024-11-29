@@ -3,9 +3,13 @@ package com.distributionsys.backend.controllers;
 import com.distributionsys.backend.dtos.request.NewExportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
+import com.distributionsys.backend.dtos.response.ClientInfoAndStatusResponse;
+import com.distributionsys.backend.dtos.response.ExportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.ExportBill;
+import com.distributionsys.backend.entities.sql.relationships.ExportBillWarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
+import com.distributionsys.backend.services.ClientInfoService;
 import com.distributionsys.backend.services.ExportBillService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -13,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/private")
@@ -25,6 +31,7 @@ public class ExportBillControllers {
     public ResponseEntity<ApiResponseObject<TablePagesResponse<ExportBill>>> getExportBillPages(
         @RequestHeader("Authorization") String accessToken,
         @Valid PaginatedTableRequest request) {
+        System.out.println(accessToken);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_PAGES,
             exportBillService.getExportBillPages(accessToken, request));
     }
@@ -35,5 +42,18 @@ public class ExportBillControllers {
         @Valid @RequestBody NewExportBillRequest request) {
         exportBillService.createExportBill(accessToken, request);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.PENDING_EXPORT_BILL);
+    }
+
+    @GetMapping("/user/v1/get-export-bill-top5")
+    public ResponseEntity<ApiResponseObject<List<ExportBill>>> getTop3ExportBills(
+            @RequestHeader("Authorization") String accessToken) {
+
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_RECENT_EXPORT_BILL_LIST  ,
+                exportBillService.getTop5ExportBills(accessToken));
+    }
+    @GetMapping("/user/v1/exports-bill/{id}")
+    public ResponseEntity<ApiResponseObject<List<ExportBillDetailsResponse>>> getExportBillDetail(@PathVariable Long id) {
+        List<ExportBillDetailsResponse> goodsList = exportBillService.getExportBillDetails(id);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_DETAIL, goodsList);
     }
 }

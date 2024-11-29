@@ -33,4 +33,6 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
         @Param("ignoredName") String ignoredName);
 
     boolean existsBySupplierName(String supplierName);
+    @Query("SELECT COUNT(s) FROM Supplier s")
+    Long countAllSuppliers();
 }

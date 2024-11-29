@@ -138,4 +138,8 @@ public class GoodsService {
             throw new ApplicationException(ErrorCodes.UPDATE_GOODS);
         goodsRepository.deleteById(request.getId());
     }
+
+    public List<Goods> getAllGoods() {
+        return goodsRepository.findAll();
+    }
 }

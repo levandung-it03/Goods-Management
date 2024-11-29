@@ -54,4 +54,5 @@ public interface GoodsRepository extends JpaRepository<Goods, Long> {
         WHERE g.goodsId = :#{#newInfo.goodsId}
     """)
     void updateGoodsByGoodsInfo(@Param("newInfo") Goods build);
+
 }

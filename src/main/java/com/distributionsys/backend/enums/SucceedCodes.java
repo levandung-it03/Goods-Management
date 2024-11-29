@@ -44,11 +44,20 @@ public enum SucceedCodes {
     PENDING_IMPORT_BILL(26003, "Creating Import Bill request received by system, this may take a while!"),
     CREATE_IMPORT_BILL(26004, "New Import Bill has been created successfully!"),
     DISCARD_IMPORT_BILL(26005, "Discard Import Bill successfully!"),
+    GET_RECENT_IMPORT_BILL_LIST(26006, "Get recent Import Bill successfully!"),
+    GET_IMPORT_BILL_DETAIL(26007,"Get Import Bill Detail successfully!"),
     //--ExportBill(27)
     GET_EXPORT_BILL_PAGES(27001, "Get Export Bill pages successfully"),
     PENDING_EXPORT_BILL(27002, "Creating Export Bill request received by system, this may take a while!"),
-    ;
-
+    GET_RECENT_EXPORT_BILL_LIST(27003, "Get recent Export Bill successfully!"),
+    GET_EXPORT_BILL_DETAIL(27004, "Get Export Bill Detail successfully!"),
+    //--ClientInfo(28)
+    GET_CLIENT_INFO(28001, "Get Client Info successfully"),
+    UPDATE_CLIENT_INFO(28002, "Update Client Info successfully"),
+    //--Statistic(29)
+    GET_STATISTICS_SUCCESS(29001, "Get statistics successfully"),
+    GET_GOODS_QUANTITY(29002, "Get goods quantity successfully!"),
+    GET_EXPORT_IMPORT_TREND(29003, "Get export import trend successfully!");
     int code;
     String message;
 }
