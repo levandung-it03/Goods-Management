@@ -1,7 +1,12 @@
 package com.distributionsys.backend.repositories;
 
+import com.distributionsys.backend.dtos.utils.UserFilterRequest;
+import com.distributionsys.backend.dtos.utils.WarehouseGoodsFilterRequest;
 import com.distributionsys.backend.entities.sql.User;
 import jakarta.transaction.Transactional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +24,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Long countInactiveUser();
 
     Optional<User> findByEmail(String email);
+
+    @Query("""
+        SELECT u FROM User u
+        WHERE 
+            (:#{#filterObj.email} IS NULL OR u.email LIKE CONCAT('%',:#{#filterObj.email},'%')) AND
+            (:#{#filterObj.status} IS NULL OR u.active = :#{#filterObj.status})
+        ORDER BY
+            u.userId ASC
+    """)
+    Page<User> findAllByUserFilter(
+        @Param("filterObj") UserFilterRequest userFilter,
+        Pageable pageableCf
+    );
 
     @Transactional
     @Modifying

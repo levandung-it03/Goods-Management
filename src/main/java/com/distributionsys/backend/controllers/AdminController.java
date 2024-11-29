@@ -10,11 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.distributionsys.backend.dtos.request.NewClientRequest;
+import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
+import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.User;
+import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
 import com.distributionsys.backend.services.AdminService;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,6 +43,13 @@ public class AdminController {
     @GetMapping("/admin/v1/count-total-inactive-clients")
     public ResponseEntity<ApiResponseObject<Long>> getTotalInactiveClient() {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_TOTAL_CLIENT, this.adminService.getTotalInactiveClient());
+    }
+
+    @GetMapping("/admin/v1/get-full-users-as-page")
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<User>>> getFullInfoGoodsPages(
+        @Valid PaginatedTableRequest request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_CLIENTS,
+            adminService.getAllUsers(request));
     }
 
     @PostMapping("/admin/v1/create-new-client")
