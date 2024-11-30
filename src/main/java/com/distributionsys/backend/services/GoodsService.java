@@ -17,7 +17,6 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import com.distributionsys.backend.services.redis.FluxedGoodsFromWarehouseService;
-import com.distributionsys.backend.services.webflux.FluxedAsyncService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,7 +40,6 @@ public class GoodsService {
     GoodsRepository goodsRepository;
     WarehouseGoodsRepository warehouseGoodsRepository;
     SupplierRepository supplierRepository;
-    WarehouseGoodsRepository warehouseGoodsRepository;
     PageMappers pageMappers;
     JwtService jwtService;
 
@@ -91,15 +89,12 @@ public class GoodsService {
             .build();
     }
 
-    public Flux<List<FluxedGoodsFromWarehouse>> fluxGoodsToStreamQuantity(String accessToken,
-                                                                          FluxGoodsFromWarehouseRequest request) {
-        return fluxedAsyncService
-            .prepareFluxedGoodsFromWarehouseStreaming(accessToken, request)
-            .flatMapMany(userId ->
-                Flux.interval(Duration.ofSeconds(2))
-                    .publishOn(Schedulers.boundedElastic())
-                    .map(tick -> fluxedGoodsFromWarehouseService.findAllByUserId(userId))
-            );
+    public Flux<List<FluxedGoodsFromWarehouse>> fluxGoodsToStreamQuantity(String accessToken) {
+        var email = jwtService.readPayload(accessToken).get("sub");
+        return Flux.interval(Duration.ofSeconds(2))
+            .publishOn(Schedulers.boundedElastic())
+            .flatMap(tick -> fluxedGoodsFromWarehouseService.getFluxedGoodsByUserEmail(email))
+            .doOnCancel(() -> fluxedGoodsFromWarehouseService.clearFluxedGoodsOfCurrentSession(email).block());
     }
 
     public void addGoods(NewGoodsRequest request) {
