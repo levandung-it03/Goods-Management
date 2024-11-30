@@ -9,12 +9,10 @@ import org.springframework.data.redis.core.RedisHash;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@RedisHash(value = "FluxedGoods")
+@RedisHash("AsyncExecutingBillsFlag")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FluxedGoodsFromWarehouse {
+public class AsyncExecutingBillsFlag {
     @Id
-    String id;
     String userEmail;
-    Long goodsFromWarehouseId;
-    Long currentQuantity;
+    Boolean isExecuting;
 }

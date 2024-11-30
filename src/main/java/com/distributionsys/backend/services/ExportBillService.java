@@ -11,6 +11,7 @@ import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
+import com.distributionsys.backend.services.webflux.FluxedAsyncService;
 import jakarta.persistence.OptimisticLockException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +37,15 @@ import java.util.Objects;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ExportBillService {
+
     PlatformTransactionManager transactionManager;
+    FluxedGoodsFromWarehouseCrud fluxedGoodsFromWarehouseCrud;
     WarehouseGoodsRepository warehouseGoodsRepository;
     ExportBillWarehouseGoodsRepository exportBillWarehouseGoodsRepository;
     ExportBillRepository exportBillRepository;
     ClientInfoRepository clientInfoRepository;
     JwtService jwtService;
+    FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
 
     public TablePagesResponse<ExportBill> getExportBillPages(String accessToken,
@@ -76,8 +80,8 @@ public class ExportBillService {
 
     @Async
     public void createExportBill(String accessToken, NewExportBillRequest request) {
-        var clientInfo = clientInfoRepository
-            .findByUserEmail(jwtService.readPayload(accessToken).get("sub"))
+        var email = jwtService.readPayload(accessToken).get("sub");
+        var clientInfo = clientInfoRepository.findByUserEmail(email)
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
 
         int MAX_RETRY = 10;
@@ -116,6 +120,10 @@ public class ExportBillService {
                 }
                 exportBillWarehouseGoodsRepository.saveAll(newExportBillWhGoodsRelationship);
                 transactionManager.commit(transStatus);
+
+                fluxedGoodsFromWarehouseCrud.deleteAllByUserEmail(email);
+                fluxedAsyncService.updateFluxedGoodsFromWarehouseQuantityInRedis(updatedWarehouseGoodsList);
+
                 break;
             } catch (RuntimeException e) {
                 transactionManager.rollback(transStatus);
@@ -123,7 +131,6 @@ public class ExportBillService {
                 throw new ApplicationException(ErrorCodes.UNAWARE_ERR);
             }
         }
-
         log.info("Too many threads on ExportBill");
         throw new ApplicationException(ErrorCodes.RETRY_TOO_MANY_TIMES);
     }

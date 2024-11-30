@@ -18,6 +18,7 @@ public enum SucceedCodes {
     SEND_RANDOM_PASSWORD(21006, "Send random password into your email successfully"),
     GET_OTP_TO_CHANGE_PASSWORD(21007, "Authentication successfully and sent OTP"),
     CHANGE_PASSWORD(21008, "Change password successfully"),
+    CHECK_ASYNC_EXECUTOR_FLAG(21009, "Check async executor flag successfully"),
     //--Enum(22)
     GET_ALL_GENDER_ENUMS(22001, "Get all Genders successfully"),
     //--Supplier(23)
@@ -38,6 +39,8 @@ public enum SucceedCodes {
     DELETE_GOODS(25005, "Delete Goods successfully"),
     GET_FULL_INFO_GOODS_PAGES_BY_IP_BILL(25006, "Get Goods from each Warehouse pages of Import Bill successfully"),
     GET_FULL_INFO_GOODS_PAGES_BY_EX_BILL(25007, "Get Goods from each Warehouse pages of Export Bill successfully"),
+    PREPARE_FLUX_GOODS_QUANTITY(25008, "Prepare Flux Quantity successfully" ),
+    CANCEL_FLUX_GOODS_QUANTITY(25009, "Cancel Flux Quantity successfully" ),
     //--ImportBill(26)
     GET_IMPORT_BILL_PAGES(26001, "Get Import Bill pages successfully"),
     ADD_IMPORT_BILL(26002, "Add new Import Bill successfully"),

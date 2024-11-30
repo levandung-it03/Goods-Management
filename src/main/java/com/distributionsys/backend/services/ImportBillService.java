@@ -1,6 +1,5 @@
 package com.distributionsys.backend.services;
 
-import com.distributionsys.backend.dtos.general.ByIdDto;
 import com.distributionsys.backend.dtos.request.NewImportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
@@ -13,6 +12,7 @@ import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
+import com.distributionsys.backend.services.webflux.FluxedAsyncService;
 import jakarta.persistence.OptimisticLockException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +48,7 @@ public class ImportBillService {
     GoodsRepository goodsRepository;
     WarehouseRepository warehouseRepository;
     JwtService jwtService;
+    FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
 
     public TablePagesResponse<ImportBill> getImportBillPages(String accessToken,
@@ -145,7 +146,9 @@ public class ImportBillService {
                             .get(whGoods.getGoods().getGoodsId() + "," + whGoods.getWarehouse().getWarehouseId()))
                         .build()).toList());
                 transactionManager.commit(transStatus);
-                break;
+                //--Update Warehouse Goods or another fluxed streaming.
+                fluxedAsyncService.updateFluxedGoodsFromWarehouseQuantityInRedis(savedWarehouseGoodsList);
+                return;
             } catch (RuntimeException e) {
                 transactionManager.rollback(transStatus);
                 log.info("Unaware exception throw when working with Hibernate, ImportBill Transactional rollback!");
