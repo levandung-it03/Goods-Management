@@ -43,8 +43,12 @@ public class GoodsService {
     PageMappers pageMappers;
     JwtService jwtService;
 
-    public TablePagesResponse<Goods> getGoodsPages(PaginatedTableRequest request) {
-        Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(Goods.class);
+    public long getTotalGoods() {
+        return this.goodsRepository.count();
+    }
+
+    public TablePagesResponse<WarehouseGoods> getFullInfoGoodsPages(PaginatedTableRequest request) {
+        Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(WarehouseGoods.class);
         if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
             Page<Goods> repoRes = goodsRepository.findAll(pageableCf);
             return TablePagesResponse.<Goods>builder().data(repoRes.stream().toList())

@@ -60,7 +60,14 @@ public enum SucceedCodes {
     //--Statistic(29)
     GET_STATISTICS_SUCCESS(29001, "Get statistics successfully"),
     GET_GOODS_QUANTITY(29002, "Get goods quantity successfully!"),
-    GET_EXPORT_IMPORT_TREND(29003, "Get export import trend successfully!");
+    GET_EXPORT_IMPORT_TREND(29003, "Get export import trend successfully!"),
+    //--Admin(30)
+    GET_TOTAL_CLIENT(30001, "Clients found successfully"),
+    DEACTIVATE_CLIENT(30002, "Deactivate client successfully"),
+    NEW_CLIENT_CREATED(30003, "New client created successfully"),
+    GET_CLIENTS(30004, "Clients found successfully"),
+    ;
+
     int code;
     String message;
 }
