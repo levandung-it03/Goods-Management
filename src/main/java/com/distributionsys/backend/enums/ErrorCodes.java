@@ -57,6 +57,8 @@ public enum ErrorCodes {
     //--Export(17)
     NOT_ENOUGH_QUANTITY_TO_EXPORT(17001, "Data updated and there are some Goods quantity doesn't have enough!", BAD_REQUEST),
     ;
+//    --Client
+
 
     int code;
     String message;

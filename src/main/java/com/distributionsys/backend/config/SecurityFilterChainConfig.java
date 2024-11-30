@@ -8,7 +8,6 @@ import com.distributionsys.backend.enums.ErrorCodes;
 import com.distributionsys.backend.enums.TokenTypes;
 import com.distributionsys.backend.exceptions.ExpiredTokenException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;

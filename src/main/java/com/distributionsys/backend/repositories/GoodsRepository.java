@@ -1,8 +1,11 @@
 package com.distributionsys.backend.repositories;
 
 import com.distributionsys.backend.annotations.dev.OptimizedQuery;
+import com.distributionsys.backend.dtos.utils.GoodsFilterRequest;
 import com.distributionsys.backend.entities.sql.Goods;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -54,4 +57,14 @@ public interface GoodsRepository extends JpaRepository<Goods, Long> {
         WHERE g.goodsId = :#{#newInfo.goodsId}
     """)
     void updateGoodsByGoodsInfo(@Param("newInfo") Goods build);
+
+    @Query("""
+        SELECT g FROM Goods g
+        WHERE (:#{#filterObj.goodsId} IS NULL OR g.goodsName LIKE CONCAT('%',:#{#filterObj.goodsId},'%'))
+        AND (:#{#filterObj.goodsName} IS NULL OR g.goodsName LIKE CONCAT('%',:#{#filterObj.goodsName},'%'))
+        AND (:#{#filterObj.supplierName} IS NULL OR g.supplier.supplierName LIKE CONCAT('%',:#{#filterObj.supplierName},'%'))
+        AND (:#{#filterObj.unitPrice} IS NULL OR g.unitPrice = :#{#filterObj.unitPrice})
+        ORDER BY g.goodsId ASC
+    """)
+    Page<Goods> findAllByGoodsFilterInfo(@Param("filterObj") GoodsFilterRequest goodsInfo, Pageable pageableCf);
 }

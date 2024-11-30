@@ -8,7 +8,8 @@ import java.util.List;
 
 @Repository
 public interface FluxedGoodsFromWarehouseCrud extends CrudRepository<FluxedGoodsFromWarehouse, Long> {
-    void deleteAllByUserId(Long userId);
 
-    List<FluxedGoodsFromWarehouse> findAllByUserId(Long userId);
+    List<FluxedGoodsFromWarehouse> findAllByGoodsFromWarehouseIdIn(List<Long> goodsFromWarehouseIds);
+
+    void deleteAllByUserEmail(String email);
 }

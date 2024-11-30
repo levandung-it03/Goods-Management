@@ -2,6 +2,7 @@ package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.request.NewExportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
+import com.distributionsys.backend.dtos.response.ExportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.ExportBillFilterRequest;
 import com.distributionsys.backend.entities.sql.ExportBill;
@@ -11,12 +12,14 @@ import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
+import com.distributionsys.backend.services.webflux.FluxedAsyncService;
 import jakarta.persistence.OptimisticLockException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -28,7 +31,9 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @EnableAsync
@@ -36,12 +41,15 @@ import java.util.Objects;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ExportBillService {
+
     PlatformTransactionManager transactionManager;
+    FluxedGoodsFromWarehouseCrud fluxedGoodsFromWarehouseCrud;
     WarehouseGoodsRepository warehouseGoodsRepository;
     ExportBillWarehouseGoodsRepository exportBillWarehouseGoodsRepository;
     ExportBillRepository exportBillRepository;
     ClientInfoRepository clientInfoRepository;
     JwtService jwtService;
+    FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
 
     public TablePagesResponse<ExportBill> getExportBillPages(String accessToken,
@@ -76,8 +84,8 @@ public class ExportBillService {
 
     @Async
     public void createExportBill(String accessToken, NewExportBillRequest request) {
-        var clientInfo = clientInfoRepository
-            .findByUserEmail(jwtService.readPayload(accessToken).get("sub"))
+        var email = jwtService.readPayload(accessToken).get("sub");
+        var clientInfo = clientInfoRepository.findByUserEmail(email)
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
 
         int MAX_RETRY = 10;
@@ -116,6 +124,10 @@ public class ExportBillService {
                 }
                 exportBillWarehouseGoodsRepository.saveAll(newExportBillWhGoodsRelationship);
                 transactionManager.commit(transStatus);
+
+                fluxedGoodsFromWarehouseCrud.deleteAllByUserEmail(email);
+                fluxedAsyncService.updateFluxedGoodsFromWarehouseQuantityInRedis(updatedWarehouseGoodsList);
+
                 break;
             } catch (RuntimeException e) {
                 transactionManager.rollback(transStatus);
@@ -123,8 +135,33 @@ public class ExportBillService {
                 throw new ApplicationException(ErrorCodes.UNAWARE_ERR);
             }
         }
-
         log.info("Too many threads on ExportBill");
         throw new ApplicationException(ErrorCodes.RETRY_TOO_MANY_TIMES);
+    }
+
+    public List<ExportBill> getTop5ExportBills(String accessToken) {
+        // Lấy thông tin người dùng từ JWT
+        String username = jwtService.readPayload(accessToken).get("sub").toString();
+
+        // Lấy thông tin client từ repository dựa trên email người dùng
+        var clientInfo = clientInfoRepository
+                .findByUserEmail(username)
+                .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
+
+        // Lấy 3 hóa đơn xuất khẩu mới nhất
+        return exportBillRepository.findTop5ByClientInfoIdOrderByCreatedTimeDesc(clientInfo.getClientInfoId(), PageRequest.of(0, 5));
+    }
+
+    public List<ExportBillDetailsResponse> getExportBillDetails(Long exportBillId) {
+        // Truy vấn tất cả chi tiết liên quan đến exportBillId
+        List<ExportBillWarehouseGoods> goodsList = exportBillWarehouseGoodsRepository.findByExportBill_ExportBillId(exportBillId);
+
+        // Chuyển đổi dữ liệu thành DTO
+        return goodsList.stream()
+                .map(goods -> new ExportBillDetailsResponse(
+                        goods.getId(),
+                        goods.getWarehouseGoods(),
+                        goods.getGoodsQuantity()))
+                .collect(Collectors.toList());
     }
 }

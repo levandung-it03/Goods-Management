@@ -27,7 +27,7 @@ public class Goods {
     )
     Collection<Warehouse> warehouses;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "supplier_id", referencedColumnName = "supplier_id")
     Supplier supplier;
 
