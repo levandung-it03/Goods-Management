@@ -47,7 +47,7 @@ public class GoodsService {
         return this.goodsRepository.count();
     }
 
-    public TablePagesResponse<WarehouseGoods> getFullInfoGoodsPages(PaginatedTableRequest request) {
+    public TablePagesResponse<Goods> getGoodsPages(PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(WarehouseGoods.class);
         if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
             Page<Goods> repoRes = goodsRepository.findAll(pageableCf);
