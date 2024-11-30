@@ -17,6 +17,7 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import com.distributionsys.backend.services.redis.FluxedGoodsFromWarehouseService;
+import com.distributionsys.backend.services.webflux.FluxedAsyncService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -38,6 +39,7 @@ public class GoodsService {
     ExportBillWarehouseGoodsRepository exportBillWarehouseGoodsRepository;
     ImportBillWarehouseGoodsRepository importBillWarehouseGoodsRepository;
     GoodsRepository goodsRepository;
+    WarehouseGoodsRepository warehouseGoodsRepository;
     SupplierRepository supplierRepository;
     WarehouseGoodsRepository warehouseGoodsRepository;
     PageMappers pageMappers;
@@ -89,12 +91,15 @@ public class GoodsService {
             .build();
     }
 
-    public Flux<List<FluxedGoodsFromWarehouse>> fluxGoodsToStreamQuantity(String accessToken) {
-        var email = jwtService.readPayload(accessToken).get("sub");
-        return Flux.interval(Duration.ofSeconds(2))
-            .publishOn(Schedulers.boundedElastic())
-            .flatMap(tick -> fluxedGoodsFromWarehouseService.getFluxedGoodsByUserEmail(email))
-            .doOnCancel(() -> fluxedGoodsFromWarehouseService.clearFluxedGoodsOfCurrentSession(email).block());
+    public Flux<List<FluxedGoodsFromWarehouse>> fluxGoodsToStreamQuantity(String accessToken,
+                                                                          FluxGoodsFromWarehouseRequest request) {
+        return fluxedAsyncService
+            .prepareFluxedGoodsFromWarehouseStreaming(accessToken, request)
+            .flatMapMany(userId ->
+                Flux.interval(Duration.ofSeconds(2))
+                    .publishOn(Schedulers.boundedElastic())
+                    .map(tick -> fluxedGoodsFromWarehouseService.findAllByUserId(userId))
+            );
     }
 
     public void addGoods(NewGoodsRequest request) {
@@ -134,6 +139,10 @@ public class GoodsService {
         ||  importBillWarehouseGoodsRepository.existsGoodsByGoodsId(request.getId()))
             throw new ApplicationException(ErrorCodes.UPDATE_GOODS);
         goodsRepository.deleteById(request.getId());
+    }
+
+    public List<Goods> getAllGoods() {
+        return goodsRepository.findAll();
     }
 
     public void fluxGoodsQuantityPreparation(String accessToken, FluxGoodsFromWarehouseRequest request) {

@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ExportBillWarehouseGoodsRepository extends JpaRepository<ExportBillWarehouseGoods, Long> {
 
@@ -14,4 +16,6 @@ public interface ExportBillWarehouseGoodsRepository extends JpaRepository<Export
         WHERE b.warehouseGoods.goods.goodsId = :goodsId
     """)
     boolean existsGoodsByGoodsId(@Param("goodsId") Long goodsId);
+
+    List<ExportBillWarehouseGoods> findByExportBill_ExportBillId(Long exportBillId);
 }

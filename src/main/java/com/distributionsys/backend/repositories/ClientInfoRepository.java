@@ -54,7 +54,8 @@ public interface ClientInfoRepository extends JpaRepository<ClientInfo, Long> {
             c.firstName = :#{#updatedObj.firstName},
             c.lastName = :#{#updatedObj.lastName},
             c.dob = :#{#updatedObj.dob},
-            c.gender = :#{#updatedObj.gender}
+            c.gender = :#{#updatedObj.gender},
+            c.phone = :#{#updatedObj.phone}
         WHERE c.clientInfoId = :#{#updatedObj.clientInfoId}
     """)
     void updateClientInfoByClientInfoId(@Param("updatedObj") ClientInfo clientInfo);

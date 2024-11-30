@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ImportBillWarehouseGoodsRepository extends JpaRepository<ImportBillWarehouseGoods, Long> {
 
@@ -42,4 +44,6 @@ public interface ImportBillWarehouseGoodsRepository extends JpaRepository<Import
         @Param("billId") Long id,
         @Param("filterObj") WarehouseGoodsFilterRequest filterObj,
         Pageable pageableCf);
+
+    List<ImportBillWarehouseGoods> findByImportBill_ImportBillId(Long importBillId);
 }

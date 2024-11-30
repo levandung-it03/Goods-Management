@@ -17,4 +17,6 @@ public interface WarehouseGoodsRepository extends JpaRepository<WarehouseGoods, 
         WHERE CONCAT(wg.goods.goodsId, ",", wg.warehouse.warehouseId) IN :request
     """)
     List<WarehouseGoods> findAllByGoodsIdAndWarehouseIdPairs(@Param("request") List<String> warehouseGoodsIdPairs);
+
+    List<WarehouseGoods> findAll();
 }

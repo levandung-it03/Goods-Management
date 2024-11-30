@@ -2,6 +2,7 @@ package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.request.NewImportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
+import com.distributionsys.backend.dtos.response.ImportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.ImportBillFilterRequest;
 import com.distributionsys.backend.entities.sql.ImportBill;
@@ -20,6 +21,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -32,7 +34,9 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @EnableAsync
@@ -158,5 +162,31 @@ public class ImportBillService {
 
         log.info("Too many threads on ImportBill");
         throw new ApplicationException(ErrorCodes.RETRY_TOO_MANY_TIMES);
+    }
+
+    public List<ImportBill> getTop5ImportBills(String accessToken) {
+        // Lấy thông tin người dùng từ JWT
+        String username = jwtService.readPayload(accessToken).get("sub").toString();
+
+        // Lấy thông tin client từ repository dựa trên email người dùng
+        var clientInfo = clientInfoRepository
+                .findByUserEmail(username)
+                .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
+
+        // Lấy 3 hóa đơn nhập khẩu mới nhất
+        return importBillRepository.findTop5ByClientInfoIdOrderByCreatedTimeDesc(clientInfo.getClientInfoId(), PageRequest.of(0, 5));
+    }
+
+    public List<ImportBillDetailsResponse> getImportBillDetails(Long importBillId) {
+        // Truy vấn tất cả chi tiết liên quan đến importBillId
+        List<ImportBillWarehouseGoods> goodsList = importBillWarehouseGoodsRepository.findByImportBill_ImportBillId(importBillId);
+
+        // Chuyển đổi dữ liệu thành DTO
+        return goodsList.stream()
+                .map(goods -> new ImportBillDetailsResponse(
+                        goods.getId(),
+                        goods.getWarehouseGoods(),
+                        goods.getGoodsQuantity()))
+                .collect(Collectors.toList());
     }
 }
