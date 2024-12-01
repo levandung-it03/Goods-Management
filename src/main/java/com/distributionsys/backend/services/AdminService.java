@@ -76,7 +76,6 @@ public class AdminService {
         }
         try {
             var userFilters = UserFilterRequest.builderFromFilterHashMap(request.getFilterFields());
-            System.out.println("Filter object: " + userFilters);
             Page<User> repoRes = userRepository.findAllByUserFilter(userFilters, pageableCf);
             return TablePagesResponse.<User>builder()
                 .data(repoRes.stream().toList())

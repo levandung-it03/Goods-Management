@@ -18,19 +18,12 @@ public class UserFilterRequest {
 
     public static UserFilterRequest builderFromFilterHashMap(HashMap<String, Object> map) 
         throws NullPointerException, NoSuchFieldException, IllegalArgumentException {
- 
-        System.out.println("Raw filter opbect: " + map);
-
         for (String key: map.keySet()) {
-            System.out.println("key: " + key);
             if (Arrays
                 .stream(UserFilterRequest.class.getDeclaredFields())
                 .noneMatch(f -> f.getName().equals(key))) {
                     throw new NoSuchFieldException();
                 }
-            else {
-                System.out.println("bug here");
-            }
         }
 
         var result = new UserFilterRequest();
