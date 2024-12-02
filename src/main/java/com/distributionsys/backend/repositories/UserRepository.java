@@ -27,10 +27,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("""
         SELECT u FROM User u
         WHERE 
+            (:#{#filterObj.userId} IS NULL OR u.userId = :#{#filterObj.userId}) AND
             (:#{#filterObj.email} IS NULL OR u.email LIKE CONCAT('%',:#{#filterObj.email},'%')) AND
             (:#{#filterObj.status} IS NULL OR u.active = :#{#filterObj.status})
-        ORDER BY
-            u.userId ASC
     """)
     Page<User> findAllByUserFilter(
         @Param("filterObj") UserFilterRequest userFilter,
