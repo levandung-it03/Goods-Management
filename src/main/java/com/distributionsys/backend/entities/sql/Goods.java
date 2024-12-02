@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Collection;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,14 +19,6 @@ public class Goods {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "goods_id")
     Long goodsId;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "warehouse_goods",
-        joinColumns = @JoinColumn(name = "goods_id", referencedColumnName = "goods_id"),
-        inverseJoinColumns = @JoinColumn(name = "warehouse_id", referencedColumnName = "warehouse_id")
-    )
-    Collection<Warehouse> warehouses;
 
     @ManyToOne
     @JoinColumn(name = "supplier_id", nullable = false, referencedColumnName = "supplier_id")

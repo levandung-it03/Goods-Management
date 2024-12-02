@@ -37,20 +37,4 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
         @Param("ignoredName") String ignoredName);
 
     boolean existsBySupplierName(String supplierName);
-
-    @OptimizedQuery
-    @Query(value = """
-        SELECT s.supplier_id, s.supplier_name FROM supplier s
-        INNER JOIN (
-            SELECT sp.supplier_id FROM supplier sp
-            WHERE :supplierName IS NULL OR TRIM(:supplierName) = '' OR sp.supplier_name LIKE CONCAT('%', :supplierName, '%')
-            ORDER BY sp.supplier_id, sp.supplier_name
-            LIMIT :pageSize OFFSET :offset
-        ) AS found_ids
-        ON found_ids.supplier_id = s.supplier_id
-    """, nativeQuery = true)
-    List<Object[]> findAllSimpleSupplierInfoBySupplierName(
-        @Param("supplierName") String supplierName,
-        @Param("pageSize") Integer pageSize,
-        @Param("offset") Integer offset);
 }

@@ -3,7 +3,6 @@ package com.distributionsys.backend.controllers;
 import com.distributionsys.backend.dtos.request.NewImportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
-import com.distributionsys.backend.dtos.response.ExportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.ImportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.ImportBill;
@@ -33,7 +32,7 @@ public class ImportBillControllers {
             importBillService.getImportBillPages(accessToken, request));
     }
 
-    @GetMapping("/user/v1/create-import-bill")
+    @PostMapping("/user/v1/create-import-bill")
     public ResponseEntity<ApiResponseObject<Void>> createImportBill(
         @RequestHeader("Authorization") String accessToken,
         @Valid @RequestBody NewImportBillRequest request) {

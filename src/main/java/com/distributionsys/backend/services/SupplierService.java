@@ -82,14 +82,4 @@ public class SupplierService {
         supplierMappers.updateSupplier(updatedSupplier, request);
         supplierRepository.updateSupplierBySupplierInfo(updatedSupplier);
     }
-
-    public TablePagesResponse<Supplier> getSimpleSuppliersPages(SimpleSearchingDto request) {
-        var repoRes = supplierRepository.findAllSimpleSupplierInfoBySupplierName(request.getName(),
-            PageEnum.SIZE.getSize(), (request.getPage() - 1) * PageEnum.SIZE.getSize());
-        return TablePagesResponse.<Supplier>builder()
-            .data(repoRes.stream().map(Supplier::buildFromRepoResponseObjArr).toList())
-            .totalPages((int) Math.ceil((double) supplierRepository.count() / PageEnum.SIZE.getSize()))
-            .currentPage(request.getPage())
-            .build();
-    }
 }
