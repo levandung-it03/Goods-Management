@@ -1,8 +1,11 @@
 package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.general.ByIdDto;
+import com.distributionsys.backend.dtos.general.SimpleSearchingDto;
 import com.distributionsys.backend.dtos.request.*;
+import com.distributionsys.backend.dtos.response.FluxedGoodsQuantityResponse;
 import com.distributionsys.backend.dtos.response.SimpleGoodsResponse;
+import com.distributionsys.backend.dtos.response.SimpleWarehouseGoodsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.GoodsFilterRequest;
 import com.distributionsys.backend.dtos.utils.WarehouseGoodsFilterRequest;
@@ -20,6 +23,7 @@ import com.distributionsys.backend.services.redis.FluxedGoodsFromWarehouseServic
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GoodsService {
     FluxedGoodsFromWarehouseCrud fluxedGoodsFromWarehouseCrud;
@@ -83,21 +88,31 @@ public class GoodsService {
         }
     }
 
-    public TablePagesResponse<SimpleGoodsResponse> getSimpleGoodsPages(SimpleGoodsRequest request) {
-        var repoRes = goodsRepository.findAllSimpleGoodsInfoByGoodsName(request.getGoodsName(),
-            request.getPage() - 1, PageEnum.SIZE.getSize());
+    public TablePagesResponse<SimpleGoodsResponse> getSimpleGoodsPages(SimpleSearchingDto request) {
+        var repoRes = goodsRepository.findAllSimpleGoodsInfoByGoodsName(request.getName(),
+            PageEnum.SIZE.getSize(), (request.getPage() - 1) * PageEnum.SIZE.getSize());
         return TablePagesResponse.<SimpleGoodsResponse>builder()
             .data(repoRes.stream().map(SimpleGoodsResponse::buildFromRepoResponseObjArr).toList())
-            .totalPages(null)   //--Simple table with "< >" pagination-bar.
+            .totalPages((int) Math.ceil((double) goodsRepository.count() / PageEnum.SIZE.getSize()))
             .currentPage(request.getPage())
             .build();
     }
 
-    public Flux<List<FluxedGoodsFromWarehouse>> fluxGoodsToStreamQuantity(String accessToken) {
+    public TablePagesResponse<SimpleWarehouseGoodsResponse> getSimpleWarehouseGoodsPages(SimpleSearchingDto request) {
+        var repoRes = goodsRepository.findAllSimpleWarehouseGoodsInfoByGoodsName(request.getName(),
+            PageEnum.SIZE.getSize(), (request.getPage() - 1) * PageEnum.SIZE.getSize());
+        return TablePagesResponse.<SimpleWarehouseGoodsResponse>builder()
+            .data(repoRes.stream().map(SimpleWarehouseGoodsResponse::buildFromRepoResponseObjArr).toList())
+            .totalPages((int) Math.ceil((double) goodsRepository.count() / PageEnum.SIZE.getSize()))
+            .currentPage(request.getPage())
+            .build();
+    }
+
+    public Flux<List<FluxedGoodsQuantityResponse>> fluxGoodsToStreamQuantity(String accessToken) {
         var email = jwtService.readPayload(accessToken).get("sub");
-        return Flux.interval(Duration.ofSeconds(2))
+        return Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds(2))
             .publishOn(Schedulers.boundedElastic())
-            .flatMap(tick -> fluxedGoodsFromWarehouseService.getFluxedGoodsByUserEmail(email))
+            .concatMap(tick -> fluxedGoodsFromWarehouseService.getFluxedGoodsByUserEmail(email))
             .doOnCancel(() -> fluxedGoodsFromWarehouseService.clearFluxedGoodsOfCurrentSession(email).block());
     }
 
@@ -115,7 +130,7 @@ public class GoodsService {
 
     public void updateGoods(UpdateGoodsRequest request) {
         if (exportBillWarehouseGoodsRepository.existsGoodsByGoodsId(request.getGoodsId())
-            ||  importBillWarehouseGoodsRepository.existsGoodsByGoodsId(request.getGoodsId()))
+            || importBillWarehouseGoodsRepository.existsGoodsByGoodsId(request.getGoodsId()))
             throw new ApplicationException(ErrorCodes.UPDATE_GOODS);
         Goods updatedGoods = goodsRepository.findById(request.getGoodsId())
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_PRIMARY));
@@ -135,7 +150,7 @@ public class GoodsService {
         if (!goodsRepository.existsById(request.getId()))
             throw new ApplicationException(ErrorCodes.INVALID_PRIMARY);
         if (exportBillWarehouseGoodsRepository.existsGoodsByGoodsId(request.getId())
-        ||  importBillWarehouseGoodsRepository.existsGoodsByGoodsId(request.getId()))
+            || importBillWarehouseGoodsRepository.existsGoodsByGoodsId(request.getId()))
             throw new ApplicationException(ErrorCodes.UPDATE_GOODS);
         goodsRepository.deleteById(request.getId());
     }
@@ -149,7 +164,7 @@ public class GoodsService {
         var fluxedWarehouseGoods = warehouseGoodsRepository.findAllById(request.getGoodsFromWarehouseIds())
             .stream()
             .map(warehouseGoods -> FluxedGoodsFromWarehouse.builder()
-                .id(UUID.randomUUID().toString())
+                .id(email + "_" + warehouseGoods.getId())
                 .userEmail(email)
                 .goodsFromWarehouseId(warehouseGoods.getId())
                 .currentQuantity(warehouseGoods.getCurrentQuantity())
@@ -157,9 +172,5 @@ public class GoodsService {
             .toList();
         fluxedGoodsFromWarehouseCrud.deleteAllByUserEmail(email); //--Clear all old-data if it's exists
         fluxedGoodsFromWarehouseCrud.saveAll(fluxedWarehouseGoods);
-    }
-
-    public void fluxGoodsQuantityCancellation(String accessToken) {
-        fluxedGoodsFromWarehouseCrud.deleteAllByUserEmail(jwtService.readPayload(accessToken).get("sub"));
     }
 }

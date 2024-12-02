@@ -11,15 +11,13 @@ import lombok.experimental.FieldDefaults;
 public class SimpleGoodsResponse {
     Long goodsId;
     String goodsName;
-    String warehouseName;
     String supplierName;
 
-    public static SimpleGoodsResponse buildFromRepoResponseObjArr(Object[] repoResponse) {
+    public static SimpleGoodsResponse buildFromRepoResponseObjArr(Object[] objects) {
         return SimpleGoodsResponse.builder()
-            .goodsId(Long.valueOf(repoResponse[0].toString()))
-            .goodsName(repoResponse[1].toString())
-            .warehouseName(repoResponse[2].toString())
-            .supplierName(repoResponse[3].toString())
+            .goodsId(Long.valueOf(objects[0].toString()))
+            .goodsName(objects[1].toString())
+            .supplierName(objects[2].toString())
             .build();
     }
 }

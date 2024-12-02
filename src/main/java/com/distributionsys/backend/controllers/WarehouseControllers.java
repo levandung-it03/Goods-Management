@@ -1,10 +1,12 @@
 package com.distributionsys.backend.controllers;
 
 import com.distributionsys.backend.dtos.general.ByIdDto;
+import com.distributionsys.backend.dtos.general.SimpleSearchingDto;
 import com.distributionsys.backend.dtos.request.NewWarehouseRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.request.UpdateWarehouseRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
+import com.distributionsys.backend.dtos.response.SimpleWarehouseResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.Warehouse;
 import com.distributionsys.backend.enums.SucceedCodes;
@@ -28,6 +30,13 @@ public class WarehouseControllers {
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_WAREHOUSES_PAGES,
             warehouseService.getWarehousesPages(request));
+    }
+
+    @GetMapping("/user/v1/get-simple-warehouse-pages")
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<SimpleWarehouseResponse>>> getSimpleGoodsPages(
+        @Valid SimpleSearchingDto request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_SIMPLE_WAREHOUSE_PAGES,
+            warehouseService.getSimpleGoodsPages(request));
     }
 
     @PostMapping("/user/v1/add-warehouse")

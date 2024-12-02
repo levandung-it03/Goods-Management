@@ -13,6 +13,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestControllerAdvice
@@ -75,6 +79,17 @@ public class ApplicationExceptionHandler {
         var response = ApiResponseObject.buildByErrorCodes(ErrorCodes.CONSTRAINT_VIOLATION);
         log.info("[HANDLER]_ConstraintViolationException: {}", exception.getMessage());
         return response;
+    }
+
+    @ExceptionHandler(value = IOException.class)
+    public ResponseEntity<ApiResponseObject<Void>> handleIOException(IOException exception) {
+        log.info("[HANDLER]_IOException: {}", exception.getMessage());
+        final List<String> ignoredErrors = List.of(
+            "ESTABLISHED CONNECTION WAS ABORTED"
+        );
+        if (ignoredErrors.stream().noneMatch(error -> exception.getMessage().toUpperCase().contains(error)))
+            return ApiResponseObject.buildByErrorCodes(ErrorCodes.UNAWARE_ERR);
+        else return ResponseEntity.of(Optional.empty());
     }
 
     @ExceptionHandler(value = Exception.class)

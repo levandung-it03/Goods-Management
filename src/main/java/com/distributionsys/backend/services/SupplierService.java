@@ -1,12 +1,14 @@
 package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.general.ByIdDto;
+import com.distributionsys.backend.dtos.general.SimpleSearchingDto;
 import com.distributionsys.backend.dtos.request.NewSupplierRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.request.UpdateSupplierRequest;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.Supplier;
 import com.distributionsys.backend.enums.ErrorCodes;
+import com.distributionsys.backend.enums.PageEnum;
 import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.mappers.SupplierMappers;
@@ -79,5 +81,15 @@ public class SupplierService {
             throw new ApplicationException(ErrorCodes.DUPLICATE_SUPPLIER);
         supplierMappers.updateSupplier(updatedSupplier, request);
         supplierRepository.updateSupplierBySupplierInfo(updatedSupplier);
+    }
+
+    public TablePagesResponse<Supplier> getSimpleSuppliersPages(SimpleSearchingDto request) {
+        var repoRes = supplierRepository.findAllSimpleSupplierInfoBySupplierName(request.getName(),
+            PageEnum.SIZE.getSize(), (request.getPage() - 1) * PageEnum.SIZE.getSize());
+        return TablePagesResponse.<Supplier>builder()
+            .data(repoRes.stream().map(Supplier::buildFromRepoResponseObjArr).toList())
+            .totalPages((int) Math.ceil((double) supplierRepository.count() / PageEnum.SIZE.getSize()))
+            .currentPage(request.getPage())
+            .build();
     }
 }

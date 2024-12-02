@@ -34,6 +34,7 @@ public class Warehouse {
                 throw new NoSuchFieldException();
 
         var result = new Warehouse();
+        result.setWarehouseId(!map.containsKey("warehouseId") ? null : Long.parseLong(map.get("warehouseId").toString()));
         result.setWarehouseName(!map.containsKey("warehouseName") ? null : map.get("warehouseName").toString());
         result.setAddress(!map.containsKey("address") ? null : map.get("address").toString());
         return result;

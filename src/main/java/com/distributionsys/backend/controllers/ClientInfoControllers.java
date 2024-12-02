@@ -25,9 +25,8 @@ public class ClientInfoControllers {
     @GetMapping("/user/v1/info")
     public ResponseEntity<ApiResponseObject<ClientInfoResponse>> getClientInfo(
             @RequestHeader("Authorization") String accessToken) {
-        System.out.println(accessToken);
-        var clientInfo = clientInfoService.getClientInfo(accessToken);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_CLIENT_INFO, clientInfo);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_CLIENT_INFO,
+            clientInfoService.getClientInfo(accessToken));
     }
 
     // Sửa thông tin client đã đăng nhập

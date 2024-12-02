@@ -11,7 +11,10 @@ import java.util.Collection;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "goods", indexes = @Index(name = "name_cln_index", columnList = "goods_name"))
+@Table(
+    name = "goods",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"goods_id", "supplier_id"})},
+    indexes = @Index(name = "name_cln_index", columnList = "goods_name"))
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Goods {
     @Id
@@ -28,7 +31,7 @@ public class Goods {
     Collection<Warehouse> warehouses;
 
     @ManyToOne
-    @JoinColumn(name = "supplier_id", referencedColumnName = "supplier_id")
+    @JoinColumn(name = "supplier_id", nullable = false, referencedColumnName = "supplier_id")
     Supplier supplier;
 
     @Column(name = "goods_name", nullable = false, length = 100)

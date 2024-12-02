@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.RedisHash;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@RedisHash(value = "FluxedGoods")
+@RedisHash(value = "FluxedGoodsFromWarehouse")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FluxedGoodsFromWarehouse {
     @Id

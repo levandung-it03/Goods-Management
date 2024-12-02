@@ -31,7 +31,6 @@ public class ExportBillControllers {
     public ResponseEntity<ApiResponseObject<TablePagesResponse<ExportBill>>> getExportBillPages(
         @RequestHeader("Authorization") String accessToken,
         @Valid PaginatedTableRequest request) {
-        System.out.println(accessToken);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_PAGES,
             exportBillService.getExportBillPages(accessToken, request));
     }

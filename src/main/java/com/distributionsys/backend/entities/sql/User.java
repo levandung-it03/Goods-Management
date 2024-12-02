@@ -36,7 +36,7 @@ public class User implements UserDetails {
     @Column(name = "created_time", nullable = false)
     LocalDateTime createdTime;
 
-    @ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER, targetEntity = Authority.class)
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Authority.class)
     @JoinTable(
         name = "user_authorities",
         joinColumns = @JoinColumn(name = "user_id"),

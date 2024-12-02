@@ -18,12 +18,12 @@ public class UserAuthority {
     Long id;
 
     @ManyToOne(targetEntity = User.class)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "user_id")
     @JsonIgnore
     User user;
 
     @ManyToOne(targetEntity = Authority.class)
-    @JoinColumn(name = "authority_id", referencedColumnName = "authority_id")
+    @JoinColumn(name = "authority_id", nullable = false, referencedColumnName = "authority_id")
     @JsonIgnore
     Authority authority;
 }

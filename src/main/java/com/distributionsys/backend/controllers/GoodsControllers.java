@@ -1,11 +1,9 @@
 package com.distributionsys.backend.controllers;
 
 import com.distributionsys.backend.dtos.general.ByIdDto;
+import com.distributionsys.backend.dtos.general.SimpleSearchingDto;
 import com.distributionsys.backend.dtos.request.*;
-import com.distributionsys.backend.dtos.response.ApiResponseObject;
-import com.distributionsys.backend.dtos.response.SimpleGoodsResponse;
-import com.distributionsys.backend.dtos.response.TablePagesResponse;
-import com.distributionsys.backend.entities.redis.FluxedGoodsFromWarehouse;
+import com.distributionsys.backend.dtos.response.*;
 import com.distributionsys.backend.entities.sql.Goods;
 import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
@@ -42,9 +40,17 @@ public class GoodsControllers {
             goodsService.getFullInfoGoodsPagesByImportBill(request));
     }
 
+
+    @GetMapping("/user/v1/get-simple-warehouse-goods-pages")
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<SimpleWarehouseGoodsResponse>>>
+    getSimpleWarehouseGoodsPages(@Valid SimpleSearchingDto request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_SIMPLE_GOODS_PAGES,
+            goodsService.getSimpleWarehouseGoodsPages(request));
+    }
+
     @GetMapping("/user/v1/get-simple-goods-pages")
     public ResponseEntity<ApiResponseObject<TablePagesResponse<SimpleGoodsResponse>>> getSimpleGoodsPages(
-        @Valid SimpleGoodsRequest request) {
+        @Valid SimpleSearchingDto request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_SIMPLE_GOODS_PAGES,
             goodsService.getSimpleGoodsPages(request));
     }
@@ -57,15 +63,8 @@ public class GoodsControllers {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.PREPARE_FLUX_GOODS_QUANTITY);
     }
 
-    @PostMapping("/user/v1/flux-goods-quantity-cancellation")
-    public ResponseEntity<ApiResponseObject<Void>> fluxGoodsQuantityCancellation(
-        @RequestHeader("Authorization") String accessToken) {
-        goodsService.fluxGoodsQuantityCancellation(accessToken);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.CANCEL_FLUX_GOODS_QUANTITY);
-    }
-
     @GetMapping(value = "/user/v1/flux-goods-quantity", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<List<FluxedGoodsFromWarehouse>> fluxGoodsToStreamQuantity(
+    public Flux<List<FluxedGoodsQuantityResponse>> fluxGoodsToStreamQuantity(
         @RequestHeader("Authorization") String accessToken) {
         return goodsService.fluxGoodsToStreamQuantity(accessToken);
     }

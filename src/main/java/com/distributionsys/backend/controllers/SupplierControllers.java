@@ -1,6 +1,7 @@
 package com.distributionsys.backend.controllers;
 
 import com.distributionsys.backend.dtos.general.ByIdDto;
+import com.distributionsys.backend.dtos.general.SimpleSearchingDto;
 import com.distributionsys.backend.dtos.request.NewSupplierRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.request.UpdateSupplierRequest;
@@ -28,6 +29,13 @@ public class SupplierControllers {
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_SUPPLIERS_PAGES,
             supplierService.getSuppliersPages(request));
+    }
+
+    @GetMapping("/user/v1/get-simple-suppliers-pages")
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<Supplier>>> getSimpleSuppliersPages(
+        @Valid SimpleSearchingDto request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_SIMPLE_SUPPLIER_PAGES,
+            supplierService.getSimpleSuppliersPages(request));
     }
 
     @PostMapping("/user/v1/add-supplier")
