@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/private")
@@ -26,6 +27,15 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ExportBillControllers {
     ExportBillService exportBillService;
+
+    @GetMapping("/user/v1/total-export-bill/{exportBillId}")
+    public ResponseEntity<ApiResponseObject<Double>> createImportBill(
+        @PathVariable Long exportBillId) {
+        var data = this.exportBillService.getTotalImport(exportBillId);
+        Double result = Objects.isNull(data) ? Double.valueOf(0) : data;
+        return ApiResponseObject.buildSuccessResponse(
+            SucceedCodes.PENDING_IMPORT_BILL, result);
+    }
 
     @GetMapping("/user/v1/get-export-bill-pages")
     public ResponseEntity<ApiResponseObject<TablePagesResponse<ExportBill>>> getExportBillPages(

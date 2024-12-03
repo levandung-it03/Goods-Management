@@ -37,6 +37,28 @@ public interface ExportBillRepository extends JpaRepository<ExportBill, Long> {
         @Param("filterObj") ExportBillFilterRequest filterObj,
         Pageable pageableCf);
 
+        @Query("""
+        SELECT
+            SUM(g.unitPrice * selected_g.goodsQuantity)
+        FROM
+            Goods as g
+        INNER JOIN (
+            SELECT
+                eb.exportBillId AS exportBillId,
+                eb_detail.warehouseGoods.id AS goodsId,
+                eb_detail.goodsQuantity AS goodsQuantity
+            FROM
+                ExportBill AS eb
+            INNER JOIN
+                ExportBillWarehouseGoods AS eb_detail
+                    ON eb.exportBillId = eb_detail.exportBill.exportBillId
+        ) AS selected_g
+            ON g.goodsId = selected_g.goodsId
+        WHERE
+            selected_g.exportBillId = :exportId
+    """)
+    Double totalExportBillByExportId(@Param("exportId") Long exportId);
+
     @Query("SELECT eb FROM ExportBill eb WHERE eb.clientInfo.clientInfoId = :clientInfoId ORDER BY eb.createdTime DESC")
     List<ExportBill> findTop5ByClientInfoIdOrderByCreatedTimeDesc(Long clientInfoId, PageRequest pageRequest);
 

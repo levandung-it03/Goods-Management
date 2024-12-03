@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/private")
@@ -25,6 +26,15 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ImportBillControllers {
     ImportBillService importBillService;
+
+    @GetMapping("/user/v1/total-import-bill/{importBillId}")
+    public ResponseEntity<ApiResponseObject<Double>> createImportBill(
+        @PathVariable Long importBillId) {
+        var data = this.importBillService.getTotalImport(importBillId);
+        Double result = Objects.isNull(data) ? Double.valueOf(0) : data;
+        return ApiResponseObject.buildSuccessResponse(
+            SucceedCodes.PENDING_IMPORT_BILL, result);
+    }
 
     @GetMapping("/user/v1/get-import-bill-pages")
     public ResponseEntity<ApiResponseObject<TablePagesResponse<ImportBill>>> getImportBillPages(

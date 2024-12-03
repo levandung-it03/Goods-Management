@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -47,6 +46,10 @@ public class ExportBillService {
     JwtService jwtService;
     FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
+
+    public Double getTotalImport(Long exportBillId) {
+        return this.exportBillRepository.totalExportBillByExportId(exportBillId);
+    }
 
     @Value("${services.bills.max-retry-on-creation}")
     public static Long MAX_RETRY;

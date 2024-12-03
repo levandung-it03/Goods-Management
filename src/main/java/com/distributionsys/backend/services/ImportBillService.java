@@ -50,6 +50,10 @@ public class ImportBillService {
     @Value("${services.bills.max-retry-on-creation}")
     public static Long MAX_RETRY;
 
+    public Double getTotalImport(Long importBillId) {
+        return this.importBillRepository.totalImportBillByImportId(importBillId);
+    }
+
     public TablePagesResponse<ImportBill> getImportBillPages(String accessToken,
                                                              PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(ImportBill.class);

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.distributionsys.backend.dtos.request.NewClientRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
-import com.distributionsys.backend.dtos.response.ClientInfoResponse;
 import com.distributionsys.backend.dtos.response.ClientResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.User;
@@ -34,7 +33,7 @@ public class AdminController {
     AdminService adminService;
 
     @GetMapping("/admin/v1/get-information")
-    public ResponseEntity<ApiResponseObject<ClientInfoResponse>> getAdminInformation(
+    public ResponseEntity<ApiResponseObject<ClientResponse>> getAdminInformation(
         @RequestHeader("Authorization") String accessToken) {
         return ApiResponseObject.buildSuccessResponse(
             SucceedCodes.GET_CLIENT_INFO,

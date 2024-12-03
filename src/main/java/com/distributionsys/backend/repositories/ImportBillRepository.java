@@ -1,10 +1,8 @@
 package com.distributionsys.backend.repositories;
 
 import com.distributionsys.backend.annotations.dev.Overload;
-import com.distributionsys.backend.dtos.response.ExportImportTrendResponse;
 import com.distributionsys.backend.dtos.utils.ImportBillFilterRequest;
 import com.distributionsys.backend.entities.sql.ImportBill;
-import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,8 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +35,28 @@ public interface ImportBillRepository extends JpaRepository<ImportBill, Long> {
 
     @Query("SELECT ib FROM ImportBill ib WHERE ib.clientInfo.clientInfoId = :clientInfoId ORDER BY ib.createdTime DESC")
     List<ImportBill> findTop5ByClientInfoIdOrderByCreatedTimeDesc(Long clientInfoId, PageRequest pageRequest);
+
+    @Query("""
+        SELECT
+            SUM(g.unitPrice * selected_g.goodsQuantity)
+        FROM
+            Goods as g
+        INNER JOIN (
+            SELECT
+                ib.importBillId AS importBillId,
+                ib_detail.warehouseGoods.id AS goodsId,
+                ib_detail.goodsQuantity AS goodsQuantity
+            FROM
+                ImportBill AS ib
+            INNER JOIN
+                ImportBillWarehouseGoods AS ib_detail
+                    ON ib.importBillId = ib_detail.importBill.importBillId
+        ) AS selected_g
+            ON g.goodsId = selected_g.goodsId
+        WHERE
+            selected_g.importBillId = :importId
+    """)
+    Double totalImportBillByImportId(@Param("importId") Long importId);
 
     @Query("SELECT COUNT(i) FROM ImportBill i WHERE i.clientInfo.clientInfoId = :clientInfoId")
     Long countImportBillsByClientInfoId(@Param("clientInfoId") Long clientInfoId);
