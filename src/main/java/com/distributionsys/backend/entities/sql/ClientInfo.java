@@ -24,7 +24,7 @@ public class ClientInfo {
     Long clientInfoId;
 
     @OneToOne(targetEntity = User.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "user_id")
     @JsonIgnore
     User user;
 

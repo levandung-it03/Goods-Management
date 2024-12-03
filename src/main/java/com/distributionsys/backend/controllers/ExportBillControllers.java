@@ -3,13 +3,10 @@ package com.distributionsys.backend.controllers;
 import com.distributionsys.backend.dtos.request.NewExportBillRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
-import com.distributionsys.backend.dtos.response.ClientInfoAndStatusResponse;
 import com.distributionsys.backend.dtos.response.ExportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.ExportBill;
-import com.distributionsys.backend.entities.sql.relationships.ExportBillWarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
-import com.distributionsys.backend.services.ClientInfoService;
 import com.distributionsys.backend.services.ExportBillService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -31,12 +28,11 @@ public class ExportBillControllers {
     public ResponseEntity<ApiResponseObject<TablePagesResponse<ExportBill>>> getExportBillPages(
         @RequestHeader("Authorization") String accessToken,
         @Valid PaginatedTableRequest request) {
-        System.out.println(accessToken);
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_PAGES,
             exportBillService.getExportBillPages(accessToken, request));
     }
 
-    @GetMapping("/user/v1/create-export-bill")
+    @PostMapping("/user/v1/create-export-bill")
     public ResponseEntity<ApiResponseObject<Void>> createExportBill(
         @RequestHeader("Authorization") String accessToken,
         @Valid @RequestBody NewExportBillRequest request) {

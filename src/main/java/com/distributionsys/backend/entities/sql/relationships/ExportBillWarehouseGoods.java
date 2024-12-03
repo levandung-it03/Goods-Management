@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @Entity
 @Table(name = "export_bill_warehouse_goods",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"warehouse_goods_id", "export_bill_id"})},
     indexes = @Index(name = "bill_id_cln_index", columnList = "export_bill_id"))
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExportBillWarehouseGoods {
@@ -19,11 +20,11 @@ public class ExportBillWarehouseGoods {
     Long id;
 
     @ManyToOne
-    @JoinColumn(name = "warehouse_goods_id", referencedColumnName = "warehouse_goods_id")
+    @JoinColumn(name = "warehouse_goods_id", nullable = false, referencedColumnName = "warehouse_goods_id")
     WarehouseGoods warehouseGoods;
 
     @ManyToOne
-    @JoinColumn(name = "export_bill_id", referencedColumnName = "export_bill_id")
+    @JoinColumn(name = "export_bill_id", nullable = false, referencedColumnName = "export_bill_id")
     ExportBill exportBill;
 
     @Column(name = "goods_quantity", nullable = false)

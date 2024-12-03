@@ -1,12 +1,14 @@
 package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.general.ByIdDto;
+import com.distributionsys.backend.dtos.general.SimpleSearchingDto;
 import com.distributionsys.backend.dtos.request.NewSupplierRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.request.UpdateSupplierRequest;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.Supplier;
 import com.distributionsys.backend.enums.ErrorCodes;
+import com.distributionsys.backend.enums.PageEnum;
 import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.mappers.SupplierMappers;

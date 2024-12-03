@@ -32,7 +32,15 @@ public class Supplier {
                 throw new NoSuchFieldException();
 
         var result = new Supplier();
+        result.setSupplierId(!map.containsKey("supplierId") ? null : Long.parseLong(map.get("supplierId").toString()));
         result.setSupplierName(!map.containsKey("supplierName") ? null : map.get("supplierName").toString());
         return result;
+    }
+
+    public static Supplier buildFromRepoResponseObjArr(Object[] objArr) {
+        return Supplier.builder()
+            .supplierId(Long.parseLong(objArr[0].toString()))
+            .supplierName(objArr[1].toString())
+            .build();
     }
 }

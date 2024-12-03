@@ -1,5 +1,6 @@
 package com.distributionsys.backend.repositories;
 
+import com.distributionsys.backend.annotations.dev.OptimizedQuery;
 import com.distributionsys.backend.entities.sql.Supplier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,12 +11,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
 
     @Query("""
         SELECT s FROM Supplier s
-        WHERE (:#{#filterObj.supplierName} IS NULL OR s.supplierName LIKE CONCAT('%', :#{#filterObj.supplierName}, '%'))
+        WHERE (:#{#filterObj.supplierId} IS NULL OR s.supplierId = :#{#filterObj.supplierId})
+        AND (:#{#filterObj.supplierName} IS NULL OR s.supplierName LIKE CONCAT('%', :#{#filterObj.supplierName}, '%'))
     """)
     Page<Supplier> findAllBySupplierFilterInfo(@Param("filterObj") Supplier supplierInfo, Pageable pageableCf);
 
@@ -33,6 +37,4 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
         @Param("ignoredName") String ignoredName);
 
     boolean existsBySupplierName(String supplierName);
-    @Query("SELECT COUNT(s) FROM Supplier s")
-    Long countAllSuppliers();
 }

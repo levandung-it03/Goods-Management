@@ -21,7 +21,7 @@ public class ImportBill {
     Long importBillId;
 
     @ManyToOne
-    @JoinColumn(name = "client_info_id", referencedColumnName = "client_info_id")
+    @JoinColumn(name = "client_info_id", nullable = false, referencedColumnName = "client_info_id")
     ClientInfo clientInfo;
 
     @DateTimeFormat

@@ -11,25 +11,24 @@ import java.util.HashMap;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WarehouseGoodsFilterRequest {
-    String goodsName;
-    Float unitPrice;
-    String supplierName;
+public class GoodsFromWarehouseFilterRequest {
+    Long warehouseGoodsId;
+    Long warehouseId;
     String warehouseName;
     String address;
     Long currentQuantity;
 
-    public static WarehouseGoodsFilterRequest buildFromFilterHashMap(HashMap<String, Object> map)
+    public static GoodsFromWarehouseFilterRequest buildFromFilterHashMap(HashMap<String, Object> map)
         throws NullPointerException, NoSuchFieldException, IllegalArgumentException {
         for (String key: map.keySet())
-            if (Arrays.stream(WarehouseGoodsFilterRequest.class.getDeclaredFields())
+            if (Arrays.stream(GoodsFromWarehouseFilterRequest.class.getDeclaredFields())
                 .noneMatch(f -> f.getName().equals(key)))
-                    throw new NoSuchFieldException();
+                throw new NoSuchFieldException();
 
-        var result = new WarehouseGoodsFilterRequest();
-        result.setGoodsName(map.containsKey("goodsName") ? map.get("goodsName").toString() : null);
-        result.setUnitPrice(map.containsKey("unitPrice") ? Float.parseFloat(map.get("unitPrice").toString()) : null);
-        result.setSupplierName(map.containsKey("supplierName") ? map.get("supplierName").toString() : null);
+        var result = new GoodsFromWarehouseFilterRequest();
+        result.setWarehouseGoodsId(!map.containsKey("warehouseGoodsId") ? null
+            : Long.parseLong(map.get("warehouseGoodsId").toString()));
+        result.setWarehouseId(map.containsKey("warehouseId") ? Long.parseLong(map.get("warehouseId").toString()) : null);
         result.setWarehouseName(map.containsKey("warehouseName") ? map.get("warehouseName").toString() : null);
         result.setAddress(map.containsKey("address") ? map.get("address").toString() : null);
         result.setCurrentQuantity(map.containsKey("currentQuantity")

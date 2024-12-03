@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public enum PageEnum {
-    SIZE(10),
+    SIZE(5),
     ;
     final int size;
 }

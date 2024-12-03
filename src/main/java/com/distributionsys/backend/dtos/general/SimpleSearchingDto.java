@@ -1,4 +1,4 @@
-package com.distributionsys.backend.dtos.request;
+package com.distributionsys.backend.dtos.general;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -10,8 +10,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SimpleGoodsRequest {
-    String goodsName;
+public class SimpleSearchingDto {
+    String name;
 
     @NotNull
     @Min(1)

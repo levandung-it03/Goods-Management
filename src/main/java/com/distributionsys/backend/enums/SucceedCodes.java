@@ -26,11 +26,13 @@ public enum SucceedCodes {
     ADD_SUPPLIER(23002, "Add Supplier successfully"),
     DELETE_SUPPLIER(23003, "Delete Supplier successfully"),
     UPDATE_SUPPLIER(23004, "Update Supplier successfully"),
+    GET_SIMPLE_SUPPLIER_PAGES(23005, "Get Simple Supplier information pages successfully"),
     //--Warehouse(24)
     GET_WAREHOUSES_PAGES(24001, "Get Warehouses pages successfully"),
     ADD_WAREHOUSE(24002, "Add Warehouse successfully"),
     DELETE_WAREHOUSE(24003, "Delete Warehouse successfully"),
     UPDATE_WAREHOUSE(24004, "Update Warehouse successfully"),
+    GET_SIMPLE_WAREHOUSE_PAGES(24005, "Get Simple Warehouse information pages successfully"),
     //--Goods(25)
     GET_FULL_INFO_GOODS_PAGES(25001, "Get Goods from each Warehouse pages successfully"),
     GET_SIMPLE_GOODS_PAGES(25002, "Get Simple Goods information pages successfully"),

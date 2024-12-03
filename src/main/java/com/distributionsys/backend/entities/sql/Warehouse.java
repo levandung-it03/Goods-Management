@@ -26,7 +26,7 @@ public class Warehouse {
     @Column(name = "address", nullable = false, length = 200)
     String address;
 
-    public static Warehouse buildFormFilterHashMap(HashMap<String, Object> map)
+    public static Warehouse buildFromFilterHashMap(HashMap<String, Object> map)
         throws NullPointerException, IllegalArgumentException, NoSuchFieldException {
         for (String key : map.keySet())
             if (Arrays.stream(Warehouse.class.getDeclaredFields())
@@ -34,6 +34,7 @@ public class Warehouse {
                 throw new NoSuchFieldException();
 
         var result = new Warehouse();
+        result.setWarehouseId(!map.containsKey("warehouseId") ? null : Long.parseLong(map.get("warehouseId").toString()));
         result.setWarehouseName(!map.containsKey("warehouseName") ? null : map.get("warehouseName").toString());
         result.setAddress(!map.containsKey("address") ? null : map.get("address").toString());
         return result;

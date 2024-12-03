@@ -1,5 +1,6 @@
 package com.distributionsys.backend.services.redis;
 
+import com.distributionsys.backend.dtos.response.FluxedGoodsQuantityResponse;
 import com.distributionsys.backend.entities.redis.FluxedGoodsFromWarehouse;
 import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
 import lombok.AccessLevel;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -40,20 +42,20 @@ public class FluxedGoodsFromWarehouseService {
     }
 
     public Mono<Void> clearFluxedGoodsOfCurrentSession(String userEmail) {
-        return warehouseGoodsOps.opsForSet()
-            .members("FluxedGoods:userEmail:" + userEmail)
-            .flatMap(e -> warehouseGoodsOps.opsForHash().delete("FluxedGoods:" + e.getId()))
+        return warehouseGoodsOps.keys("FluxedGoodsFromWarehouse:" + userEmail + "_*")
+            .flatMap(warehouseGoodsOps::delete)
             .then();
     }
 
-    public Flux<List<FluxedGoodsFromWarehouse>> getFluxedGoodsByUserEmail(String userEmail) {
-        return warehouseGoodsOps.opsForSet()
-            .members("FluxedGoods:userEmail:" + userEmail)
-            .flatMap(e ->
-                warehouseGoodsOps.opsForValue()
-                    .get("FluxedGoods:" + e.getId())
-                    .switchIfEmpty(Mono.empty())
-            ).collectList().flux()
-            .filter(l -> !l.isEmpty());
+    public Flux<List<FluxedGoodsQuantityResponse>> getFluxedGoodsByUserEmail(String userEmail) {
+        return warehouseGoodsOps.keys("FluxedGoodsFromWarehouse:" + userEmail + "_*")
+            .flatMap(key -> warehouseGoodsOps.opsForHash()
+                .entries(key)
+                .collectMap(Map.Entry::getKey, Map.Entry::getValue)
+                .map(entry -> FluxedGoodsQuantityResponse.builder()
+                    .warehouseGoodsId(Long.parseLong(entry.get("goodsFromWarehouseId").toString()))
+                    .currentQuantity(Long.parseLong(entry.get("currentQuantity").toString()))
+                    .build())
+            ).collectList().flux();
     }
 }

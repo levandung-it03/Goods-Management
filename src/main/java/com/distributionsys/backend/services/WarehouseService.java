@@ -1,12 +1,15 @@
 package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.general.ByIdDto;
+import com.distributionsys.backend.dtos.general.SimpleSearchingDto;
 import com.distributionsys.backend.dtos.request.NewWarehouseRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.request.UpdateWarehouseRequest;
+import com.distributionsys.backend.dtos.response.SimpleWarehouseResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.Warehouse;
 import com.distributionsys.backend.enums.ErrorCodes;
+import com.distributionsys.backend.enums.PageEnum;
 import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.mappers.WarehouseMappers;
@@ -32,7 +35,7 @@ public class WarehouseService {
 
     public TablePagesResponse<Warehouse> getWarehousesPages(PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(Warehouse.class);
-        if (Objects.isNull(request) || request.getFilterFields().isEmpty()) {
+        if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
             Page<Warehouse> repoRes = warehouseRepository.findAll(pageableCf);
             return TablePagesResponse.<Warehouse>builder()
                 .data(repoRes.stream().toList())
@@ -41,7 +44,7 @@ public class WarehouseService {
                 .build();
         }
         try {
-            var warehouseInfo = Warehouse.buildFormFilterHashMap(request.getFilterFields());
+            var warehouseInfo = Warehouse.buildFromFilterHashMap(request.getFilterFields());
             Page<Warehouse> repoRes = warehouseRepository.findAllByWarehouseFilterInfo(warehouseInfo, pageableCf);
             return TablePagesResponse.<Warehouse>builder()
                 .data(repoRes.stream().toList())
@@ -51,6 +54,16 @@ public class WarehouseService {
         } catch (ApplicationException | NullPointerException | IllegalArgumentException | NoSuchFieldException e) {
             throw new ApplicationException(ErrorCodes.INVALID_FILTERING_FIELD_OR_VALUE);
         }
+    }
+
+    public TablePagesResponse<SimpleWarehouseResponse> getSimpleGoodsPages(SimpleSearchingDto request) {
+        var repoRes = warehouseRepository.findAllSimpleWarehouseInfoByWarehouseName(request.getName(),
+            PageEnum.SIZE.getSize(), (request.getPage() - 1) * PageEnum.SIZE.getSize());
+        return TablePagesResponse.<SimpleWarehouseResponse>builder()
+            .data(repoRes.stream().map(SimpleWarehouseResponse::buildFromRepoResponseObjArr).toList())
+            .totalPages((int) Math.ceil((double) warehouseRepository.count() / PageEnum.SIZE.getSize()))
+            .currentPage(request.getPage())
+            .build();
     }
 
     public void addWarehouse(NewWarehouseRequest request) {

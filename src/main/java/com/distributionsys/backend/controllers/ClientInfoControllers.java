@@ -1,9 +1,7 @@
 package com.distributionsys.backend.controllers;
 
-import com.distributionsys.backend.dtos.request.ClientInfoAndStatusRequest;
-import com.distributionsys.backend.dtos.request.ClientInfoRequest;
+import com.distributionsys.backend.dtos.request.*;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
-import com.distributionsys.backend.dtos.response.ClientInfoAndStatusResponse;
 import com.distributionsys.backend.dtos.response.ClientInfoResponse;
 import com.distributionsys.backend.enums.SucceedCodes;
 import com.distributionsys.backend.services.ClientInfoService;
@@ -25,9 +23,8 @@ public class ClientInfoControllers {
     @GetMapping("/user/v1/info")
     public ResponseEntity<ApiResponseObject<ClientInfoResponse>> getClientInfo(
             @RequestHeader("Authorization") String accessToken) {
-        System.out.println(accessToken);
-        var clientInfo = clientInfoService.getClientInfo(accessToken);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_CLIENT_INFO, clientInfo);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_CLIENT_INFO,
+            clientInfoService.getClientInfo(accessToken));
     }
 
     // Sửa thông tin client đã đăng nhập
