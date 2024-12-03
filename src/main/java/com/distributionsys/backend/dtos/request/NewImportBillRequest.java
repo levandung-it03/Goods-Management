@@ -17,8 +17,8 @@ public class NewImportBillRequest {
 
     @NotNull
     @NotEmpty
-    @ListTypeConstraint(listType = ImportedWarehouseGoodsDto.class)
-    List<ImportedWarehouseGoodsDto> importedWarehouseGoods;
+    @ListTypeConstraint(listType = NewImportBillRequest.ImportedWarehouseGoodsDto.class)
+    List<NewImportBillRequest.ImportedWarehouseGoodsDto> importedWarehouseGoods;
 
     @Data
     @NoArgsConstructor

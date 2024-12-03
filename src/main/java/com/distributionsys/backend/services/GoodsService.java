@@ -21,6 +21,7 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import com.distributionsys.backend.services.redis.FluxedGoodsFromWarehouseService;
+import com.distributionsys.backend.services.redis.RedisFGFWHTemplateService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,6 +40,7 @@ import java.util.*;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GoodsService {
+    RedisFGFWHTemplateService redisFGFWHTemplateService;
     FluxedGoodsFromWarehouseCrud fluxedGoodsFromWarehouseCrud;
     FluxedGoodsFromWarehouseService fluxedGoodsFromWarehouseService;
     ExportBillWarehouseGoodsRepository exportBillWarehouseGoodsRepository;
@@ -165,13 +167,13 @@ public class GoodsService {
         var fluxedWarehouseGoods = warehouseGoodsRepository.findAllById(request.getGoodsFromWarehouseIds())
             .stream()
             .map(warehouseGoods -> FluxedGoodsFromWarehouse.builder()
-                .id(email + "_" + warehouseGoods.getWarehouseGoodsId())
-                .userEmail(email)
-                .goodsFromWarehouseId(warehouseGoods.getWarehouseGoodsId())
+                .id(email + "/" + FluxedGoodsFromWarehouse.GOODS_FROM_WAREHOUSE_ID + "_" + warehouseGoods.getWarehouseGoodsId())
                 .currentQuantity(warehouseGoods.getCurrentQuantity())
+                .goodsFromWarehouseId(warehouseGoods.getWarehouseGoodsId())
                 .build())
             .toList();
-        fluxedGoodsFromWarehouseCrud.deleteAllByUserEmail(email); //--Clear all old-data if it's exists
+        //--Clear all old-data if it's exists
+        redisFGFWHTemplateService.deleteData(FluxedGoodsFromWarehouse.NAME + ":" + email);
         fluxedGoodsFromWarehouseCrud.saveAll(fluxedWarehouseGoods);
     }
 

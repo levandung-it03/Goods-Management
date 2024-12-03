@@ -9,12 +9,14 @@ import org.springframework.data.redis.core.RedisHash;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@RedisHash(value = "FluxedGoodsFromWarehouse")
+@RedisHash(value = "FGFWH")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FluxedGoodsFromWarehouse {
+    public static String NAME = "FGFWH";
+    public static String GOODS_FROM_WAREHOUSE_ID = NAME + "&GFWHID";
+
     @Id
     String id;
-    String userEmail;
     Long goodsFromWarehouseId;
     Long currentQuantity;
 }

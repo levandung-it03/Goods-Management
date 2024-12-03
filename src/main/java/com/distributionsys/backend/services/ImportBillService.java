@@ -23,8 +23,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -39,7 +37,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-@EnableAsync
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -85,10 +82,9 @@ public class ImportBillService {
         }
     }
 
-    @Async
     public void createImportBill(String accessToken, NewImportBillRequest request) {
-        var clientInfo = clientInfoRepository
-            .findByUserEmail(jwtService.readPayload(accessToken).get("sub"))
+        var email = jwtService.readPayload(accessToken).get("sub");
+        var clientInfo = clientInfoRepository.findByUserEmail(email)
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
         var goodsListInOrder = goodsRepository.findAllById(request.getImportedWarehouseGoods().stream()
             .map(NewImportBillRequest.ImportedWarehouseGoodsDto::getGoodsId).toList());
