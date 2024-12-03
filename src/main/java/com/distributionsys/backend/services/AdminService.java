@@ -1,9 +1,9 @@
 package com.distributionsys.backend.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,13 +11,20 @@ import org.springframework.stereotype.Service;
 import com.distributionsys.backend.dtos.request.NewClientRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ClientInfoResponse;
+import com.distributionsys.backend.dtos.response.ClientResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.UserFilterRequest;
+import com.distributionsys.backend.entities.sql.Authority;
+import com.distributionsys.backend.entities.sql.ClientInfo;
 import com.distributionsys.backend.entities.sql.User;
+import com.distributionsys.backend.entities.sql.UserAuthority;
 import com.distributionsys.backend.enums.ErrorCodes;
+import com.distributionsys.backend.enums.Gender;
 import com.distributionsys.backend.exceptions.ApplicationException;
 import com.distributionsys.backend.mappers.PageMappers;
+import com.distributionsys.backend.repositories.AuthorityRepository;
 import com.distributionsys.backend.repositories.ClientInfoRepository;
+import com.distributionsys.backend.repositories.UserAuthorityRepository;
 import com.distributionsys.backend.repositories.UserRepository;
 import com.distributionsys.backend.services.auth.JwtService;
 
@@ -31,6 +38,8 @@ import lombok.experimental.FieldDefaults;
 public class AdminService {
     ClientInfoRepository clientInfoRepository;
     UserRepository userRepository;
+    AuthorityRepository authorityRepository;
+    UserAuthorityRepository userAuthorityRepository;
     PageMappers pageMappers;
     JwtService jwtService;
     private final PasswordEncoder userPasswordEncoder;
@@ -64,21 +73,21 @@ public class AdminService {
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
     }
 
-    public TablePagesResponse<User> getAllUsers(PaginatedTableRequest request) {
+    public TablePagesResponse<ClientResponse> getAllUsers(PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(User.class);
         if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
-            Page<User> repoRes = userRepository.findAll(pageableCf);
-            return TablePagesResponse.<User>builder()
-                .data(repoRes.stream().toList())
+            var repoRes = userRepository.findAllNoFilters(pageableCf);
+            return TablePagesResponse.<ClientResponse>builder()
+                .data(repoRes.stream().map(ClientResponse::buildFromRepoResponseObjArr).toList())
                 .totalPages(repoRes.getTotalPages())
                 .currentPage(request.getPage())
                 .build();
         }
         try {
             var userFilters = UserFilterRequest.builderFromFilterHashMap(request.getFilterFields());
-            Page<User> repoRes = userRepository.findAllByUserFilter(userFilters, pageableCf);
-            return TablePagesResponse.<User>builder()
-                .data(repoRes.stream().toList())
+            var repoRes = userRepository.findAllByUserFilter(userFilters, pageableCf);
+            return TablePagesResponse.<ClientResponse>builder()
+                .data(repoRes.stream().map(ClientResponse::buildFromRepoResponseObjArr).toList())
                 .totalPages(repoRes.getTotalPages())
                 .currentPage(request.getPage())
                 .build();
@@ -87,34 +96,64 @@ public class AdminService {
         }
     }
 
-    public User createClient(NewClientRequest request) {
+    public ClientResponse createClient(NewClientRequest request) {
         userRepository
             .findByEmail(request.getEmail())
             .ifPresent(user -> {
                 throw new ApplicationException(ErrorCodes.USER_EXISTING);
             });
+
         var newUser = new User();
         newUser.setEmail(request.getEmail());
         newUser.setPassword(userPasswordEncoder.encode(request.getPassword()));
         newUser.setCreatedTime(LocalDateTime.now());
         newUser.setActive(true);
-        return userRepository.save(newUser);
+        var createdUser = userRepository.save(newUser);
+        if (Objects.isNull(createdUser)) {
+            throw new ApplicationException(ErrorCodes.CANNOT_CREATE_CLIENT);
+        }
+
+        var userRole = authorityRepository.findByAuthorityName("ROLE_USER");
+        if (!userRole.isPresent()) {
+            throw new ApplicationException(ErrorCodes.AUTHORITY_NOT_FOUND);
+        }
+        var newUserAuthorities = new UserAuthority();
+        newUserAuthorities.setAuthority(userRole.get());
+        newUserAuthorities.setUser(createdUser);
+        var createdUserAuthorities = userAuthorityRepository.save(newUserAuthorities);
+        if (Objects.isNull(createdUserAuthorities)) {
+            throw new ApplicationException(ErrorCodes.CANNOT_CREATE_CLIENT);
+        }
+
+        var newClient = new ClientInfo();
+        newClient.setFirstName(request.getFirstName());
+        newClient.setLastName(request.getLastName());
+        newClient.setGender(Gender.valueOf(request.getGender().toUpperCase()));
+        newClient.setPhone(request.getPhone());
+        newClient.setUser(createdUser);
+        newClient.setDob(request.getDob());
+        var createdClient = clientInfoRepository.save(newClient);
+        if (Objects.isNull(createdClient)) {
+            throw new ApplicationException(ErrorCodes.CANNOT_CREATE_CLIENT);
+        }
+
+        return ClientResponse.buildFromEntities(createdUser, createdClient);
     }
 
-    public User deactivateClient(long userId) {
+    public User updateClientStatus(long userId, String status) {
+        var validStatusValues = List.of("active", "inactive");
+        boolean isInvalidStatusParam = validStatusValues.stream().noneMatch(validStatus -> validStatus.equalsIgnoreCase(status));
+        if (isInvalidStatusParam) {
+            throw new ApplicationException(ErrorCodes.INVAILD_STATUS_VALUE);
+        }
+
         var targetUser = this.userRepository.findById(userId);
         if (targetUser.isEmpty()) {
             throw new ApplicationException(ErrorCodes.USER_NOT_FOUND);
         }
-        var userAuthorities = targetUser.get().getAuthorities();
-        for (var authority: userAuthorities) {
-            if (authority.getAuthorityName().equals("ROLE_ADMIN")) {
-                throw new ApplicationException(ErrorCodes.FORBIDDEN_USER);
-            }
-        }
-        this.userRepository.updateStatusByUserId(userId, false);
-        var udpatedUser = targetUser.get();
-        udpatedUser.setActive(false);
-        return udpatedUser;
+
+        this.userRepository.updateStatusByUserId(userId, status.equalsIgnoreCase("active") ? true : false);
+        var updatedUser = this.userRepository.findById(userId);
+        return updatedUser.get();
     }
 }

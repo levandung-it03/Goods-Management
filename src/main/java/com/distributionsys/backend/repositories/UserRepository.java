@@ -25,13 +25,50 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     @Query("""
-        SELECT u FROM User u
+        SELECT
+            u.userId,
+            u.email as email,
+            u.active as active,
+            u.createdTime,
+            ci.firstName,
+            ci.lastName,
+            ci.gender,
+            ci.phone,
+            ci.dob
+        FROM
+            User AS u
+        LEFT OUTER JOIN
+            ClientInfo as ci ON ci.user.userId = u.userId
+    """)
+    Page<Object[]> findAllNoFilters(Pageable pageableCf);
+      
+
+    @Query("""
+        SELECT
+            u.userId,
+            u.email as email,
+            u.active as active,
+            u.createdTime,
+            ci.firstName,
+            ci.lastName,
+            ci.gender,
+            ci.phone,
+            ci.dob
+        FROM
+            User AS u
+        LEFT OUTER JOIN
+            ClientInfo as ci ON ci.user.userId = u.userId
         WHERE 
             (:#{#filterObj.userId} IS NULL OR u.userId = :#{#filterObj.userId}) AND
-            (:#{#filterObj.email} IS NULL OR u.email LIKE CONCAT('%',:#{#filterObj.email},'%')) AND
+            (:#{#filterObj.email} IS NULL OR u.email LIKE CONCAT('%', :#{#filterObj.email}, '%')) AND
+            (:#{#filterObj.firstName} IS NULL OR ci.firstName LIKE CONCAT('%', :#{#filterObj.firstName}, '%')) AND
+            (:#{#filterObj.lastName} IS NULL OR ci.lastName LIKE CONCAT('%', :#{#filterObj.lastName}, '%')) AND
+            (:#{#filterObj.phone} IS NULL OR ci.phone LIKE CONCAT('%', :#{#filterObj.phone}, '%')) AND
+            (:#{#filterObj.gender} IS NULL OR ci.gender LIKE CONCAT('%', :#{#filterObj.gender}, '%')) AND
+            (:#{#filterObj.dob} IS NULL OR ci.dob = :#{#filterObj.dob}) AND
             (:#{#filterObj.status} IS NULL OR u.active = :#{#filterObj.status})
     """)
-    Page<User> findAllByUserFilter(
+    Page<Object[]> findAllByUserFilter(
         @Param("filterObj") UserFilterRequest userFilter,
         Pageable pageableCf
     );
