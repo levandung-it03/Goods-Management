@@ -1,9 +1,7 @@
 package com.distributionsys.backend.controllers;
 
-import com.distributionsys.backend.dtos.request.ClientInfoAndStatusRequest;
-import com.distributionsys.backend.dtos.request.ClientInfoRequest;
+import com.distributionsys.backend.dtos.request.*;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
-import com.distributionsys.backend.dtos.response.ClientInfoAndStatusResponse;
 import com.distributionsys.backend.dtos.response.ClientInfoResponse;
 import com.distributionsys.backend.enums.SucceedCodes;
 import com.distributionsys.backend.services.ClientInfoService;
