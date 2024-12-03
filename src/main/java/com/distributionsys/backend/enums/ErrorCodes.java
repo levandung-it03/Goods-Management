@@ -56,8 +56,11 @@ public enum ErrorCodes {
     //--Import(16)
     //--Export(17)
     NOT_ENOUGH_QUANTITY_TO_EXPORT(17001, "Data updated and there are some Goods quantity doesn't have enough!", BAD_REQUEST),
+    //--Client(18)
+    INVAILD_STATUS_VALUE(18001, "Invalid status value", BAD_REQUEST),
+    CANNOT_UPDATE_CLIENT_STATUS(18002, "Cannot update client status", BAD_REQUEST),
+    CANNOT_CREATE_CLIENT(18003, "Cannot create client", BAD_REQUEST)
     ;
-//    --Client
 
 
     int code;

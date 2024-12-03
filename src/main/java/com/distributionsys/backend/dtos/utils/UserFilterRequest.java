@@ -3,8 +3,11 @@ package com.distributionsys.backend.dtos.utils;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import com.distributionsys.backend.enums.Gender;
 
 @Data
 @NoArgsConstructor
@@ -15,6 +18,11 @@ public class UserFilterRequest {
     Long userId;
     String email;
     Boolean status;
+    String firstName;
+    String lastName;
+    Gender gender;
+    String phone;
+    LocalDate dob;
 
     public static UserFilterRequest builderFromFilterHashMap(HashMap<String, Object> map) 
         throws NullPointerException, NoSuchFieldException, IllegalArgumentException {
@@ -33,6 +41,21 @@ public class UserFilterRequest {
         );
         result.setEmail(map.containsKey("email") 
             ? map.get("email").toString() 
+            : null);
+        result.setFirstName(map.containsKey("firstName") 
+            ? map.get("firstName").toString() 
+            : null);
+        result.setLastName(map.containsKey("lastName") 
+            ? map.get("lastName").toString() 
+            : null);
+        result.setGender(map.containsKey("gender") 
+            ? Gender.valueOf(map.get("gender").toString().toUpperCase()) 
+            : null);
+        result.setPhone(map.containsKey("phone") 
+            ? map.get("phone").toString() 
+            : null);
+        result.setDob(map.containsKey("dob")
+            ? LocalDate.parse(map.get("dob").toString())
             : null);
         result.setStatus(map.containsKey("status") 
             ? Boolean.valueOf(map

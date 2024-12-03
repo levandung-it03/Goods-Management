@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.distributionsys.backend.dtos.request.NewClientRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
 import com.distributionsys.backend.dtos.response.ClientInfoResponse;
+import com.distributionsys.backend.dtos.response.ClientResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.User;
 import com.distributionsys.backend.enums.SucceedCodes;
@@ -61,7 +63,7 @@ public class AdminController {
     }
 
     @GetMapping("/admin/v1/get-full-users-as-page")
-    public ResponseEntity<ApiResponseObject<TablePagesResponse<User>>> getFullInfoGoodsPages(
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<ClientResponse>>> getFullInfoGoodsPages(
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(
             SucceedCodes.GET_CLIENTS,
@@ -69,18 +71,19 @@ public class AdminController {
     }
 
     @PostMapping("/admin/v1/create-new-client")
-    public ResponseEntity<ApiResponseObject<User>> createNewClient(
+    public ResponseEntity<ApiResponseObject<ClientResponse>> createNewClient(
         @RequestBody NewClientRequest request) {
         return ApiResponseObject.buildSuccessResponse(
             SucceedCodes.NEW_CLIENT_CREATED,
             this.adminService.createClient(request));
     }
 
-    @PatchMapping("/admin/v1/deactivate-client/{userId}")
-    public ResponseEntity<ApiResponseObject<User>> deactivateClient(
-        @PathVariable long userId) {
+    @PatchMapping("/admin/v1/update-client-status/{userId}")
+    public ResponseEntity<ApiResponseObject<User>> updateClientStatus(
+        @PathVariable long userId,
+        @RequestParam("status") String status) {
         return ApiResponseObject.buildSuccessResponse(
             SucceedCodes.DEACTIVATE_CLIENT,
-            this.adminService.deactivateClient(userId));
+            this.adminService.updateClientStatus(userId, status));
     }
 }
