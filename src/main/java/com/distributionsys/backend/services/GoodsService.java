@@ -8,6 +8,7 @@ import com.distributionsys.backend.dtos.response.SimpleGoodsResponse;
 import com.distributionsys.backend.dtos.response.SimpleWarehouseGoodsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.GoodsFilterRequest;
+import com.distributionsys.backend.dtos.utils.GoodsFromWarehouseFilterRequest;
 import com.distributionsys.backend.dtos.utils.WarehouseGoodsFilterRequest;
 import com.distributionsys.backend.entities.redis.FluxedGoodsFromWarehouse;
 import com.distributionsys.backend.entities.sql.Goods;
@@ -78,7 +79,7 @@ public class GoodsService {
                 .totalPages(repoRes.getTotalPages()).currentPage(request.getPage()).build();
         }
         try {
-            var warehouseGoodsInfo = WarehouseGoodsFilterRequest.buildFormFilterHashMap(request.getFilterFields());
+            var warehouseGoodsInfo = WarehouseGoodsFilterRequest.buildFromFilterHashMap(request.getFilterFields());
             Page<WarehouseGoods> repoRes = importBillWarehouseGoodsRepository.findWarehouseGoodsAllByImportBillId(
                 request.getId(), warehouseGoodsInfo, pageableCf);
             return TablePagesResponse.<WarehouseGoods>builder().data(repoRes.stream().toList())
@@ -164,13 +165,31 @@ public class GoodsService {
         var fluxedWarehouseGoods = warehouseGoodsRepository.findAllById(request.getGoodsFromWarehouseIds())
             .stream()
             .map(warehouseGoods -> FluxedGoodsFromWarehouse.builder()
-                .id(email + "_" + warehouseGoods.getId())
+                .id(email + "_" + warehouseGoods.getWarehouseGoodsId())
                 .userEmail(email)
-                .goodsFromWarehouseId(warehouseGoods.getId())
+                .goodsFromWarehouseId(warehouseGoods.getWarehouseGoodsId())
                 .currentQuantity(warehouseGoods.getCurrentQuantity())
                 .build())
             .toList();
         fluxedGoodsFromWarehouseCrud.deleteAllByUserEmail(email); //--Clear all old-data if it's exists
         fluxedGoodsFromWarehouseCrud.saveAll(fluxedWarehouseGoods);
+    }
+
+    public TablePagesResponse<WarehouseGoods> getGoodsFromWarehousePages(PaginatedRelationshipRequest request) {
+        Pageable pageableCf = pageMappers.relationshipPageRequestToPageable(request).toPageable(WarehouseGoods.class);
+        if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
+            Page<WarehouseGoods> repoRes = warehouseGoodsRepository.findAllByGoodsGoodsId(request.getId(), pageableCf);
+            return TablePagesResponse.<WarehouseGoods>builder().data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages()).currentPage(request.getPage()).build();
+        }
+        try {
+            var filterInfo = GoodsFromWarehouseFilterRequest.buildFromFilterHashMap(request.getFilterFields());
+            Page<WarehouseGoods> repoRes = warehouseGoodsRepository.findAllByGoodsGoodsIdAndFilterData(request.getId(),
+                filterInfo, pageableCf);
+            return TablePagesResponse.<WarehouseGoods>builder().data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages()).currentPage(request.getPage()).build();
+        } catch (NoSuchFieldException | IllegalArgumentException | NullPointerException e) {
+            throw new ApplicationException(ErrorCodes.INVALID_FILTERING_FIELD_OR_VALUE);
+        }
     }
 }

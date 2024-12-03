@@ -44,7 +44,7 @@ public class WarehouseService {
                 .build();
         }
         try {
-            var warehouseInfo = Warehouse.buildFormFilterHashMap(request.getFilterFields());
+            var warehouseInfo = Warehouse.buildFromFilterHashMap(request.getFilterFields());
             Page<Warehouse> repoRes = warehouseRepository.findAllByWarehouseFilterInfo(warehouseInfo, pageableCf);
             return TablePagesResponse.<Warehouse>builder()
                 .data(repoRes.stream().toList())

@@ -21,7 +21,7 @@ public class WarehouseGoods {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "warehouse_goods_id")
-    Long id;
+    Long warehouseGoodsId;
 
     @ManyToOne
     @JoinColumn(name = "goods_id", nullable = false, referencedColumnName = "goods_id")

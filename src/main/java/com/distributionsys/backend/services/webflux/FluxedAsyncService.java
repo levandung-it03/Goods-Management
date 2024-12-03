@@ -18,9 +18,9 @@ public class FluxedAsyncService {
 
     public void updateFluxedGoodsFromWarehouseQuantityInRedis(List<WarehouseGoods> list) {
         var updatedWhGoodsMap = new HashMap<Long, Long>();
-        list.forEach(obj -> updatedWhGoodsMap.put(obj.getId(), obj.getCurrentQuantity()));
+        list.forEach(obj -> updatedWhGoodsMap.put(obj.getWarehouseGoodsId(), obj.getCurrentQuantity()));
         fluxedGoodsFromWarehouseCrud.saveAll(fluxedGoodsFromWarehouseCrud
-            .findAllByGoodsFromWarehouseIdIn(list.stream().map(WarehouseGoods::getId).toList())
+            .findAllByGoodsFromWarehouseIdIn(list.stream().map(WarehouseGoods::getWarehouseGoodsId).toList())
             .stream()
             .filter(fluxObj -> !updatedWhGoodsMap.get(fluxObj.getGoodsFromWarehouseId()).equals(fluxObj.getCurrentQuantity()))
             .peek(fluxObj -> fluxObj.setCurrentQuantity(updatedWhGoodsMap.get(fluxObj.getGoodsFromWarehouseId())))

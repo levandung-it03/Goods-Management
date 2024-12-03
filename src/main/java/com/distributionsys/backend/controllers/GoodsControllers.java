@@ -33,6 +33,13 @@ public class GoodsControllers {
             goodsService.getGoodsPages(request));
     }
 
+    @GetMapping("/user/v1/get-goods-from-warehouse-pages")
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<WarehouseGoods>>> getGoodsFromWarehousePages(
+        @Valid PaginatedRelationshipRequest request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_FULL_INFO_GOODS_PAGES,
+            goodsService.getGoodsFromWarehousePages(request));
+    }
+
     @GetMapping("/user/v1/get-full-info-goods-pages-by-import-bill")
     public ResponseEntity<ApiResponseObject<TablePagesResponse<WarehouseGoods>>> getFullInfoGoodsPagesByImportBill(
         @Valid PaginatedRelationshipRequest request) {

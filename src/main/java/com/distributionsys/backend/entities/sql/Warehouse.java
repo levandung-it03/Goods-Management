@@ -26,7 +26,7 @@ public class Warehouse {
     @Column(name = "address", nullable = false, length = 200)
     String address;
 
-    public static Warehouse buildFormFilterHashMap(HashMap<String, Object> map)
+    public static Warehouse buildFromFilterHashMap(HashMap<String, Object> map)
         throws NullPointerException, IllegalArgumentException, NoSuchFieldException {
         for (String key : map.keySet())
             if (Arrays.stream(Warehouse.class.getDeclaredFields())
