@@ -17,15 +17,15 @@ import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import com.distributionsys.backend.services.redis.RedisFGFWHTemplateService;
 import com.distributionsys.backend.services.webflux.FluxedAsyncService;
-import jakarta.persistence.OptimisticLockException;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -47,6 +47,9 @@ public class ExportBillService {
     JwtService jwtService;
     FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
+
+    @Value("${services.bills.max-retry-on-creation}")
+    public static Long MAX_RETRY;
 
     public TablePagesResponse<ExportBill> getExportBillPages(String accessToken,
                                                              PaginatedTableRequest request) {
@@ -78,13 +81,11 @@ public class ExportBillService {
         }
     }
 
-    @Transactional(rollbackOn = {RuntimeException.class, OptimisticLockException.class})
     public void createExportBill(String accessToken, NewExportBillRequest request) {
         var email = jwtService.readPayload(accessToken).get("sub");
         var clientInfo = clientInfoRepository.findByUserEmail(email)
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
 
-        int MAX_RETRY = 10;
         for (int times = 1; times <= MAX_RETRY; times++) {
             var updatedWarehouseGoodsList = warehouseGoodsRepository.findAllById(request.getExportedWarehouseGoods()
                 .stream().map(NewExportBillRequest.ExportedWarehouseGoodsDto::getWarehouseGoodsId).toList());
@@ -99,7 +100,7 @@ public class ExportBillService {
                 try {
                     //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
                     warehouseGoodsRepository.saveAll(updatedWarehouseGoodsList);
-                } catch (OptimisticLockException e) {
+                } catch (ObjectOptimisticLockingFailureException e) {
                     log.info("Retry creating ExportBill by: {}", clientInfo.getClientInfoId());
                     continue;   //--Do it again
                 }

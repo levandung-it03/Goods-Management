@@ -16,26 +16,20 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import com.distributionsys.backend.services.webflux.FluxedAsyncService;
-import jakarta.persistence.OptimisticLockException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +37,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ImportBillService {
-    PlatformTransactionManager transactionManager;
     WarehouseGoodsRepository warehouseGoodsRepository;
     ImportBillWarehouseGoodsRepository importBillWarehouseGoodsRepository;
     ImportBillRepository importBillRepository;
@@ -53,6 +46,9 @@ public class ImportBillService {
     JwtService jwtService;
     FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
+
+    @Value("${services.bills.max-retry-on-creation}")
+    public static Long MAX_RETRY;
 
     public TablePagesResponse<ImportBill> getImportBillPages(String accessToken,
                                                              PaginatedTableRequest request) {
@@ -97,9 +93,6 @@ public class ImportBillService {
             builtWarehouseGoodsIdPairs
                 .put(reqObj.getGoodsId() + "," + reqObj.getWarehouseId(), reqObj.getImportedGoodsQuantity());
 
-        var transDef = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED);
-        TransactionStatus transStatus = transactionManager.getTransaction(transDef);
-        int MAX_RETRY = 10;
         for (int times = 1; times <= MAX_RETRY; times++) {
             var foundWarehouseGoodsList = warehouseGoodsRepository.findAllByGoodsIdAndWarehouseIdPairs(
                 builtWarehouseGoodsIdPairs.keySet().stream().toList());
@@ -127,16 +120,6 @@ public class ImportBillService {
             }
 
             try {
-                try {
-                    //--May throw DataIntegrityViolationException when saving (null-id-value entities)
-                    //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
-                    warehouseGoodsRepository.saveAll(savedWarehouseGoodsList);
-                } catch (OptimisticLockException | DataIntegrityViolationException e) {
-                    Thread.sleep(500);
-                    log.info("Retry creating ImportBill by: {}", clientInfo.getClientInfoId());
-                    continue;   //--Do it again
-                }
-
                 //--Save the rest data after all @Version entities are saved correctly.
                 var newImportBill = importBillRepository.save(ImportBill.builder()
                     .clientInfo(clientInfo).createdTime(LocalDateTime.now()).build());
@@ -147,14 +130,19 @@ public class ImportBillService {
                         .goodsQuantity(builtWarehouseGoodsIdPairs
                             .get(whGoods.getGoods().getGoodsId() + "," + whGoods.getWarehouse().getWarehouseId()))
                         .build()).toList());
-                transactionManager.commit(transStatus);
 
+                try {
+                    //--May throw DataIntegrityViolationException when saving (null-id-value entities)
+                    //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
+                    warehouseGoodsRepository.saveAll(savedWarehouseGoodsList);
+                } catch (ObjectOptimisticLockingFailureException | DataIntegrityViolationException e) {
+                    log.info("Retry creating ImportBill by: {}", clientInfo.getClientInfoId());
+                    continue;   //--Do it again
+                }
                 //--Update Warehouse Goods or another fluxed streaming.
                 fluxedAsyncService.updateFluxedGoodsFromWarehouseQuantityInRedis(savedWarehouseGoodsList);
                 return;
-            } catch (RuntimeException | InterruptedException e) {
-                transactionManager.rollback(transStatus);
-                Thread.currentThread().interrupt();
+            } catch (RuntimeException e) {
                 log.info("Unaware exception throw when working with Hibernate, ImportBill Transactional rollback!");
                 throw new ApplicationException(ErrorCodes.UNAWARE_ERR);
             }
