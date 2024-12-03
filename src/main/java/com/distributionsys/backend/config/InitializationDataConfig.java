@@ -51,11 +51,23 @@ public class InitializationDataConfig implements CommandLineRunner {
                     .authorities(List.of(authorities.getLast()))
                     .createdTime(LocalDateTime.now())
                     .active(true)
+                    .build(),
+                User.builder()
+                    .email("vgbao1231@gmail.com")
+                    .password(userPasswordEncoder.encode("vgbao1231"))
+                    .authorities(List.of(authorities.getLast()))
+                    .createdTime(LocalDateTime.now())
+                    .active(true)
                     .build()
             ));
-            clientInfoRepository.save(ClientInfo.builder()
-                .firstName("Dung").lastName("Le Van").dob(LocalDate.of(2003, 12, 11))
-                .gender(Gender.MALE).phone("0112333444").user(users.getLast()).build());
+            clientInfoRepository.saveAll(List.of(
+                ClientInfo.builder()
+                    .firstName("Dung").lastName("Le Van").dob(LocalDate.of(2003, 12, 11))
+                    .gender(Gender.MALE).phone("0112333444").user(users.get(1)).build(),
+                ClientInfo.builder()
+                    .firstName("Bao").lastName("Vo Gia").dob(LocalDate.of(2003, 12, 11))
+                    .gender(Gender.MALE).phone("0112333444").user(users.getLast()).build()
+                ));
         }
         invalidTokenCrud.deleteAll();
         refreshTokenCrud.deleteAll();
