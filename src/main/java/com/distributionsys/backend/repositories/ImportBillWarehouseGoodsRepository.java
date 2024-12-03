@@ -1,5 +1,6 @@
 package com.distributionsys.backend.repositories;
 
+import com.distributionsys.backend.dtos.utils.ImportBillWarehouseGoodsFilterRequest;
 import com.distributionsys.backend.dtos.utils.WarehouseGoodsFilterRequest;
 import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
@@ -46,4 +47,36 @@ public interface ImportBillWarehouseGoodsRepository extends JpaRepository<Import
         Pageable pageableCf);
 
     List<ImportBillWarehouseGoods> findByImportBill_ImportBillId(Long importBillId);
+
+    @Query("""
+        SELECT i FROM ImportBillWarehouseGoods i
+        WHERE i.importBill.clientInfo.clientInfoId = :clientInfoId
+        AND i.importBill.importBillId = :importBillId
+    """)
+    Page<ImportBillWarehouseGoods> findAllByClientInfoIdAndImportBillId(
+        @Param("clientInfoId") Long clientInfoId,
+        @Param("importBillId") Long importBillId,
+        Pageable pageableCf);
+
+    @Query("""
+        SELECT i FROM ImportBillWarehouseGoods i
+        WHERE i.importBill.clientInfo.clientInfoId = :clientInfoId
+        AND i.importBill.importBillId = :importBillId
+        AND (:#{#filterObj.importBillWarehouseGoodsId} IS NULL
+            OR i.importBillWarehouseGoodsId = :#{#filterObj.importBillWarehouseGoodsId})
+        AND (:#{#filterObj.goodsId} IS NULL OR i.warehouseGoods.goods.goodsId = :#{#filterObj.goodsId})
+        AND (:#{#filterObj.goodsName} IS NULL
+            OR i.warehouseGoods.goods.goodsName LIKE CONCAT('%',:#{#filterObj.goodsName},'%'))
+        AND (:#{#filterObj.unitPrice} IS NULL OR i.warehouseGoods.goods.unitPrice = :#{#filterObj.unitPrice})
+        AND (:#{#filterObj.supplierName} IS NULL
+            OR i.warehouseGoods.goods.supplier.supplierName LIKE CONCAT('%',:#{#filterObj.supplierName},'%'))
+        AND (:#{#filterObj.warehouseName} IS NULL
+            OR i.warehouseGoods.warehouse.warehouseName LIKE CONCAT('%',:#{#filterObj.warehouseName},'%'))
+        AND (:#{#filterObj.goodsQuantity} IS NULL OR i.goodsQuantity = :#{#filterObj.goodsQuantity})
+    """)
+    Page<ImportBillWarehouseGoods> findAllByClientInfoIdAndImportBillIdAndFilterInfo(
+        @Param("filterObj") ImportBillWarehouseGoodsFilterRequest filterInfo,
+        @Param("clientInfoId") Long clientInfoId,
+        @Param("importBillId") Long importBillId,
+        Pageable pageableCf);
 }

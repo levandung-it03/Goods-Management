@@ -14,6 +14,7 @@ import java.util.HashMap;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ImportBillFilterRequest {
+    Long importBillId;
     LocalDateTime fromCreatedTime;
     LocalDateTime toCreatedTime;
 
@@ -25,6 +26,8 @@ public class ImportBillFilterRequest {
                 throw new NoSuchFieldException();
 
         var result = new ImportBillFilterRequest();
+        result.setImportBillId(!map.containsKey("importBillId") ? null
+            : Long.parseLong(map.get("importBillId").toString()));
         result.setFromCreatedTime(!map.containsKey("fromCreatedTime") ? null
             : LocalDateTime.parse(map.get("fromCreatedTime").toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.setToCreatedTime(!map.containsKey("toCreatedTime") ? null

@@ -20,7 +20,7 @@ public class ImportBill {
     @Column(name = "import_bill_id")
     Long importBillId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_info_id", nullable = false, referencedColumnName = "client_info_id")
     ClientInfo clientInfo;
 
@@ -28,4 +28,6 @@ public class ImportBill {
     @Column(name = "created_time", nullable = false, updatable = false,
         columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     LocalDateTime createdTime;
+
+
 }

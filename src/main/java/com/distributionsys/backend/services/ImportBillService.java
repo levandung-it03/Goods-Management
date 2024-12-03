@@ -1,10 +1,12 @@
 package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.request.NewImportBillRequest;
+import com.distributionsys.backend.dtos.request.PaginatedRelationshipRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ImportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.ImportBillFilterRequest;
+import com.distributionsys.backend.dtos.utils.ImportBillWarehouseGoodsFilterRequest;
 import com.distributionsys.backend.entities.sql.ImportBill;
 import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
@@ -95,6 +97,8 @@ public class ImportBillService {
             builtWarehouseGoodsIdPairs
                 .put(reqObj.getGoodsId() + "," + reqObj.getWarehouseId(), reqObj.getImportedGoodsQuantity());
 
+        var transDef = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED);
+        TransactionStatus transStatus = transactionManager.getTransaction(transDef);
         int MAX_RETRY = 10;
         for (int times = 1; times <= MAX_RETRY; times++) {
             var foundWarehouseGoodsList = warehouseGoodsRepository.findAllByGoodsIdAndWarehouseIdPairs(
@@ -119,19 +123,17 @@ public class ImportBillService {
                         .warehouse(warehouseListInOrder.get(index))
                         .currentQuantity(currentWarehouseGoods.getImportedGoodsQuantity())
                         .build());
-                else    savedWarehouseGoodsList.add(updatedWarehouseGoods);
+                else savedWarehouseGoodsList.add(updatedWarehouseGoods);
             }
 
-            var transDef = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED);
-            TransactionStatus transStatus = transactionManager.getTransaction(transDef);
             try {
                 try {
                     //--May throw DataIntegrityViolationException when saving (null-id-value entities)
                     //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
                     warehouseGoodsRepository.saveAll(savedWarehouseGoodsList);
                 } catch (OptimisticLockException | DataIntegrityViolationException e) {
+                    Thread.sleep(500);
                     log.info("Retry creating ImportBill by: {}", clientInfo.getClientInfoId());
-                    transactionManager.rollback(transStatus);   //--Clear Transaction
                     continue;   //--Do it again
                 }
 
@@ -146,11 +148,13 @@ public class ImportBillService {
                             .get(whGoods.getGoods().getGoodsId() + "," + whGoods.getWarehouse().getWarehouseId()))
                         .build()).toList());
                 transactionManager.commit(transStatus);
+
                 //--Update Warehouse Goods or another fluxed streaming.
                 fluxedAsyncService.updateFluxedGoodsFromWarehouseQuantityInRedis(savedWarehouseGoodsList);
                 return;
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | InterruptedException e) {
                 transactionManager.rollback(transStatus);
+                Thread.currentThread().interrupt();
                 log.info("Unaware exception throw when working with Hibernate, ImportBill Transactional rollback!");
                 throw new ApplicationException(ErrorCodes.UNAWARE_ERR);
             }
@@ -161,28 +165,50 @@ public class ImportBillService {
     }
 
     public List<ImportBill> getTop5ImportBills(String accessToken) {
-        // Lấy thông tin người dùng từ JWT
-        String username = jwtService.readPayload(accessToken).get("sub").toString();
-
-        // Lấy thông tin client từ repository dựa trên email người dùng
         var clientInfo = clientInfoRepository
-                .findByUserEmail(username)
-                .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
-
-        // Lấy 3 hóa đơn nhập khẩu mới nhất
-        return importBillRepository.findTop5ByClientInfoIdOrderByCreatedTimeDesc(clientInfo.getClientInfoId(), PageRequest.of(0, 5));
+            .findByUserEmail(jwtService.readPayload(accessToken).get("sub"))
+            .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
+        return importBillRepository.findTop5ByClientInfoIdOrderByCreatedTimeDesc(clientInfo.getClientInfoId(),
+            PageRequest.of(0, 5));
     }
 
     public List<ImportBillDetailsResponse> getImportBillDetails(Long importBillId) {
-        // Truy vấn tất cả chi tiết liên quan đến importBillId
-        List<ImportBillWarehouseGoods> goodsList = importBillWarehouseGoodsRepository.findByImportBill_ImportBillId(importBillId);
+        return importBillWarehouseGoodsRepository.findByImportBill_ImportBillId(importBillId).stream()
+            .map(goods -> new ImportBillDetailsResponse(
+                goods.getImportBillWarehouseGoodsId(),
+                goods.getWarehouseGoods(),
+                goods.getGoodsQuantity()))
+            .collect(Collectors.toList());
+    }
 
-        // Chuyển đổi dữ liệu thành DTO
-        return goodsList.stream()
-                .map(goods -> new ImportBillDetailsResponse(
-                        goods.getId(),
-                        goods.getWarehouseGoods(),
-                        goods.getGoodsQuantity()))
-                .collect(Collectors.toList());
+    public TablePagesResponse<ImportBillWarehouseGoods> getImportBillWarehouseGoods(
+        String accessToken, PaginatedRelationshipRequest request) {
+        Pageable pageableCf = pageMappers.relationshipPageRequestToPageable(request)
+            .toPageable(ImportBillWarehouseGoods.class);
+        var clientInfo = clientInfoRepository
+            .findByUserEmail(jwtService.readPayload(accessToken).get("sub"))
+            .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
+
+        if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
+            Page<ImportBillWarehouseGoods> repoRes = importBillWarehouseGoodsRepository
+                .findAllByClientInfoIdAndImportBillId(clientInfo.getClientInfoId(), request.getId(), pageableCf);
+            return TablePagesResponse.<ImportBillWarehouseGoods>builder()
+                .data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages())
+                .currentPage(request.getPage())
+                .build();
+        }
+        try {
+            var filterInfo = ImportBillWarehouseGoodsFilterRequest.buildFromFilterHashMap(request.getFilterFields());
+            var repoRes = importBillWarehouseGoodsRepository.findAllByClientInfoIdAndImportBillIdAndFilterInfo(
+                filterInfo, clientInfo.getClientInfoId(), request.getId(), pageableCf);
+            return TablePagesResponse.<ImportBillWarehouseGoods>builder()
+                .data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages())
+                .currentPage(request.getPage())
+                .build();
+        } catch (NoSuchFieldException | IllegalArgumentException | NullPointerException e) {
+            throw new ApplicationException(ErrorCodes.INVALID_FILTERING_FIELD_OR_VALUE);
+        }
     }
 }

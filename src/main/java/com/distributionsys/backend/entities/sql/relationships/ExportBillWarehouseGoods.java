@@ -17,7 +17,8 @@ import lombok.experimental.FieldDefaults;
 public class ExportBillWarehouseGoods {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "export_bill_warehouse_goods_id")
+    Long exportBillWarehouseGoodsId;
 
     @ManyToOne
     @JoinColumn(name = "warehouse_goods_id", nullable = false, referencedColumnName = "warehouse_goods_id")

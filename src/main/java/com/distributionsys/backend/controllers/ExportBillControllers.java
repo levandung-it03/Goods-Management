@@ -1,11 +1,14 @@
 package com.distributionsys.backend.controllers;
 
 import com.distributionsys.backend.dtos.request.NewExportBillRequest;
+import com.distributionsys.backend.dtos.request.PaginatedRelationshipRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
 import com.distributionsys.backend.dtos.response.ExportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.ExportBill;
+import com.distributionsys.backend.entities.sql.relationships.ExportBillWarehouseGoods;
+import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
 import com.distributionsys.backend.services.ExportBillService;
 import jakarta.validation.Valid;
@@ -30,6 +33,14 @@ public class ExportBillControllers {
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_PAGES,
             exportBillService.getExportBillPages(accessToken, request));
+    }
+
+    @GetMapping("/user/v1/get-warehouse-goods-of-export-bill-pages")
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<ExportBillWarehouseGoods>>> getExportBillWarehouseGoods(
+        @RequestHeader("Authorization") String accessToken,
+        @Valid PaginatedRelationshipRequest request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_DETAIL,
+            exportBillService.getExportBillWarehouseGoods(accessToken, request));
     }
 
     @PostMapping("/user/v1/create-export-bill")

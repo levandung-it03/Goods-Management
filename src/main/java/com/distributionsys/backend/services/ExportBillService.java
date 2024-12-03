@@ -1,10 +1,12 @@
 package com.distributionsys.backend.services;
 
 import com.distributionsys.backend.dtos.request.NewExportBillRequest;
+import com.distributionsys.backend.dtos.request.PaginatedRelationshipRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ExportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.ExportBillFilterRequest;
+import com.distributionsys.backend.dtos.utils.ExportBillWarehouseGoodsFilterRequest;
 import com.distributionsys.backend.entities.redis.FluxedGoodsFromWarehouse;
 import com.distributionsys.backend.entities.sql.ExportBill;
 import com.distributionsys.backend.entities.sql.relationships.ExportBillWarehouseGoods;
@@ -139,9 +141,40 @@ public class ExportBillService {
     public List<ExportBillDetailsResponse> getExportBillDetails(Long exportBillId) {
         return exportBillWarehouseGoodsRepository.findByExportBill_ExportBillId(exportBillId).stream()
             .map(goods -> new ExportBillDetailsResponse(
-                goods.getId(),
+                goods.getExportBillWarehouseGoodsId(),
                 goods.getWarehouseGoods(),
                 goods.getGoodsQuantity()))
             .collect(Collectors.toList());
+    }
+
+    public TablePagesResponse<ExportBillWarehouseGoods> getExportBillWarehouseGoods(
+        String accessToken, PaginatedRelationshipRequest request) {
+        Pageable pageableCf = pageMappers.relationshipPageRequestToPageable(request)
+            .toPageable(ExportBillWarehouseGoods.class);
+        var clientInfo = clientInfoRepository
+            .findByUserEmail(jwtService.readPayload(accessToken).get("sub"))
+            .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
+
+        if (Objects.isNull(request.getFilterFields()) || request.getFilterFields().isEmpty()) {
+            Page<ExportBillWarehouseGoods> repoRes = exportBillWarehouseGoodsRepository
+                .findAllByClientInfoIdAndExportBillId(clientInfo.getClientInfoId(), request.getId(), pageableCf);
+            return TablePagesResponse.<ExportBillWarehouseGoods>builder()
+                .data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages())
+                .currentPage(request.getPage())
+                .build();
+        }
+        try {
+            var filterInfo = ExportBillWarehouseGoodsFilterRequest.buildFromFilterHashMap(request.getFilterFields());
+            var repoRes = exportBillWarehouseGoodsRepository.findAllByClientInfoIdAndExportBillIdAndFilterInfo(
+                filterInfo, clientInfo.getClientInfoId(), request.getId(), pageableCf);
+            return TablePagesResponse.<ExportBillWarehouseGoods>builder()
+                .data(repoRes.stream().toList())
+                .totalPages(repoRes.getTotalPages())
+                .currentPage(request.getPage())
+                .build();
+        } catch (NoSuchFieldException | IllegalArgumentException | NullPointerException e) {
+            throw new ApplicationException(ErrorCodes.INVALID_FILTERING_FIELD_OR_VALUE);
+        }
     }
 }
