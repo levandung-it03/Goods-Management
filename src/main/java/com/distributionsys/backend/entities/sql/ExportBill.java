@@ -20,7 +20,7 @@ public class ExportBill {
     @Column(name = "export_bill_id")
     Long exportBillId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_info_id", nullable = false, referencedColumnName = "client_info_id")
     ClientInfo clientInfo;
 

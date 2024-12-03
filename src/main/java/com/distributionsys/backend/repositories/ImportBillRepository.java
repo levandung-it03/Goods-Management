@@ -27,6 +27,7 @@ public interface ImportBillRepository extends JpaRepository<ImportBill, Long> {
     @Query("""
         SELECT b FROM ImportBill b
         WHERE b.clientInfo.clientInfoId = :clientInfoId
+        AND (:#{#filterObj.importBillId} IS NULL OR b.importBillId = :#{#filterObj.importBillId})
         AND (:#{#filterObj.fromCreatedTime} IS NULL OR :#{#filterObj.fromCreatedTime} <= b.createdTime)
         AND (:#{#filterObj.toCreatedTime} IS NULL OR b.createdTime <= :#{#filterObj.toCreatedTime})
         ORDER BY b.createdTime DESC

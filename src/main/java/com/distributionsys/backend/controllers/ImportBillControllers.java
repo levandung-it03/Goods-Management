@@ -1,11 +1,13 @@
 package com.distributionsys.backend.controllers;
 
 import com.distributionsys.backend.dtos.request.NewImportBillRequest;
+import com.distributionsys.backend.dtos.request.PaginatedRelationshipRequest;
 import com.distributionsys.backend.dtos.request.PaginatedTableRequest;
 import com.distributionsys.backend.dtos.response.ApiResponseObject;
 import com.distributionsys.backend.dtos.response.ImportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.ImportBill;
+import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
 import com.distributionsys.backend.services.ImportBillService;
 import jakarta.validation.Valid;
@@ -30,6 +32,14 @@ public class ImportBillControllers {
         @Valid PaginatedTableRequest request) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_IMPORT_BILL_PAGES,
             importBillService.getImportBillPages(accessToken, request));
+    }
+
+    @GetMapping("/user/v1/get-warehouse-goods-of-import-bill-pages")
+    public ResponseEntity<ApiResponseObject<TablePagesResponse<ImportBillWarehouseGoods>>> getImportBillWarehouseGoods(
+        @RequestHeader("Authorization") String accessToken,
+        @Valid PaginatedRelationshipRequest request) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_IMPORT_BILL_DETAIL,
+            importBillService.getImportBillWarehouseGoods(accessToken, request));
     }
 
     @PostMapping("/user/v1/create-import-bill")

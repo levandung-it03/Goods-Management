@@ -25,6 +25,8 @@ public class InitializationDataConfig implements CommandLineRunner {
     PasswordEncoder userPasswordEncoder;
     InvalidTokenCrud invalidTokenCrud;
     RefreshTokenCrud refreshTokenCrud;
+    ChangePasswordOtpCrud changePasswordOtpCrud;
+    ForgotPasswordOtpCrud forgotPasswordOtpCrud;
     FluxedGoodsFromWarehouseCrud fluxedGoodsFromWarehouseCrud;
     ClientInfoRepository clientInfoRepository;
 
@@ -72,5 +74,7 @@ public class InitializationDataConfig implements CommandLineRunner {
         invalidTokenCrud.deleteAll();
         refreshTokenCrud.deleteAll();
         fluxedGoodsFromWarehouseCrud.deleteAll();
+        changePasswordOtpCrud.deleteAll();
+        forgotPasswordOtpCrud.deleteAll();
     }
 }

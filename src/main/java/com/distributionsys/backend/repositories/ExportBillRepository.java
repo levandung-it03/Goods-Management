@@ -26,6 +26,7 @@ public interface ExportBillRepository extends JpaRepository<ExportBill, Long> {
     @Query("""
         SELECT b FROM ExportBill b
         WHERE b.clientInfo.clientInfoId = :clientInfoId
+        AND (:#{#filterObj.exportBillId} IS NULL OR b.exportBillId = :#{#filterObj.exportBillId})
         AND (:#{#filterObj.receiverName} IS NULL OR b.receiverName LIKE CONCAT('%',:#{#filterObj.receiverName},'%'))
         AND (:#{#filterObj.fromCreatedTime} IS NULL OR :#{#filterObj.fromCreatedTime} <= b.createdTime)
         AND (:#{#filterObj.toCreatedTime} IS NULL OR b.createdTime <= :#{#filterObj.toCreatedTime})
