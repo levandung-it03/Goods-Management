@@ -27,6 +27,13 @@ import java.util.List;
 public class ExportBillControllers {
     ExportBillService exportBillService;
 
+    @GetMapping("/user/v1/total-export-bill/{exportBillId}")
+    public ResponseEntity<ApiResponseObject<Double>> createImportBill(
+        @PathVariable Long exportBillId) {
+        return ApiResponseObject.buildSuccessResponse(
+            SucceedCodes.PENDING_IMPORT_BILL, this.exportBillService.getTotalImport(exportBillId));
+    }
+
     @GetMapping("/user/v1/get-export-bill-pages")
     public ResponseEntity<ApiResponseObject<TablePagesResponse<ExportBill>>> getExportBillPages(
         @RequestHeader("Authorization") String accessToken,

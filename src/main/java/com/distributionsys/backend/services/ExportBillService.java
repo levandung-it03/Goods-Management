@@ -48,6 +48,10 @@ public class ExportBillService {
     FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
 
+    public Double getTotalImport(Long exportBillId) {
+        return this.exportBillRepository.totalExportBillByExportId(exportBillId);
+    }
+
     public TablePagesResponse<ExportBill> getExportBillPages(String accessToken,
                                                              PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(ExportBill.class);

@@ -20,7 +20,6 @@ import com.distributionsys.backend.dtos.utils.UserFilterRequest;
 import com.distributionsys.backend.entities.sql.ClientInfo;
 import com.distributionsys.backend.entities.sql.User;
 import com.distributionsys.backend.entities.sql.UserAuthority;
-import com.distributionsys.backend.entities.utils.PageObject;
 import com.distributionsys.backend.enums.ErrorCodes;
 import com.distributionsys.backend.enums.Gender;
 import com.distributionsys.backend.enums.PageEnum;

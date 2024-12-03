@@ -54,6 +54,10 @@ public class ImportBillService {
     FluxedAsyncService fluxedAsyncService;
     PageMappers pageMappers;
 
+    public Double getTotalImport(Long importBillId) {
+        return this.importBillRepository.totalImportBillByImportId(importBillId);
+    }
+
     public TablePagesResponse<ImportBill> getImportBillPages(String accessToken,
                                                              PaginatedTableRequest request) {
         Pageable pageableCf = pageMappers.tablePageRequestToPageable(request).toPageable(ImportBill.class);
