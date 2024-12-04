@@ -173,7 +173,7 @@ public class GoodsService {
                 .goodsFromWarehouseId(warehouseGoods.getWarehouseGoodsId())
                 .build())
             .toList();
-        if (redisFGFWHTemplateService.existsByKeyPattern(FluxedGoodsFromWarehouse.NAME + ":" + email))
+        if (redisFGFWHTemplateService.existsByKeyPattern(FluxedGoodsFromWarehouse.NAME + ":" + email + "*"))
             throw new ApplicationException(ErrorCodes.EXISTING_SESSION_FOR_FLUX);
         fluxedGoodsFromWarehouseCrud.saveAll(fluxedWarehouseGoods);
     }

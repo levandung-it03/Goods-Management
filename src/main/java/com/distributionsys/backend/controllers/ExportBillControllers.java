@@ -64,14 +64,14 @@ public class ExportBillControllers {
 
     @GetMapping("/user/v1/get-export-bill-top5")
     public ResponseEntity<ApiResponseObject<List<ExportBill>>> getTop3ExportBills(
-            @RequestHeader("Authorization") String accessToken) {
-
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_RECENT_EXPORT_BILL_LIST  ,
-                exportBillService.getTop5ExportBills(accessToken));
+        @RequestHeader("Authorization") String accessToken) {
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_RECENT_EXPORT_BILL_LIST,
+            exportBillService.getTop5ExportBills(accessToken));
     }
+
     @GetMapping("/user/v1/exports-bill/{id}")
     public ResponseEntity<ApiResponseObject<List<ExportBillDetailsResponse>>> getExportBillDetail(@PathVariable Long id) {
-        List<ExportBillDetailsResponse> goodsList = exportBillService.getExportBillDetails(id);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_DETAIL, goodsList);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_EXPORT_BILL_DETAIL,
+            exportBillService.getExportBillDetails(id));
     }
 }

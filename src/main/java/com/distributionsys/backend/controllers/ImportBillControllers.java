@@ -64,15 +64,14 @@ public class ImportBillControllers {
 
     @GetMapping("/user/v1/get-import-bill-top5")
     public ResponseEntity<ApiResponseObject<List<ImportBill>>> getTop3ImportBills(
-            @RequestHeader("Authorization") String accessToken) {
-
+        @RequestHeader("Authorization") String accessToken) {
         return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_RECENT_IMPORT_BILL_LIST,
-                importBillService.getTop5ImportBills(accessToken));
+            importBillService.getTop5ImportBills(accessToken));
     }
 
     @GetMapping("/user/v1/imports-bill/{id}")
     public ResponseEntity<ApiResponseObject<List<ImportBillDetailsResponse>>> getExportBillDetail(@PathVariable Long id) {
-        List<ImportBillDetailsResponse> goodsList = importBillService.getImportBillDetails(id);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_IMPORT_BILL_DETAIL, goodsList);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.GET_IMPORT_BILL_DETAIL,
+            importBillService.getImportBillDetails(id));
     }
 }
