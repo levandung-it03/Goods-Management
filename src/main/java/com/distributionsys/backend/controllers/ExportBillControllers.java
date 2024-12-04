@@ -17,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,11 +29,13 @@ public class ExportBillControllers {
     ExportBillService exportBillService;
 
     @GetMapping("/user/v1/total-export-bill/{exportBillId}")
-    public ResponseEntity<ApiResponseObject<Double>> createImportBill(
+    public ResponseEntity<ApiResponseObject<String>> createImportBill(
         @PathVariable Long exportBillId) {
         var data = this.exportBillService.getTotalImport(exportBillId);
         Double result = Objects.isNull(data) ? Double.valueOf(0) : data;
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.TOTAL_EXPORT_BILL, result);
+        DecimalFormat df = new DecimalFormat("#,###.##");
+        String formattedData = df.format(result);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.TOTAL_EXPORT_BILL, formattedData);
     }
 
     @GetMapping("/user/v1/get-export-bill-pages")
