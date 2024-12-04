@@ -54,4 +54,16 @@ public interface ImportBillRepository extends JpaRepository<ImportBill, Long> {
     List<Object[]> findImportDataByDateRange(@Param("startDate") LocalDateTime startDate,
                                              @Param("endDate") LocalDateTime endDate);
 
+//    @Query("""
+//        SELECT
+//            CASE WHEN g.unitPrice % 2 = 0 THEN 2 ELSE 1 END AS numType,
+//            SUM(g.unitPrice) AS totalunit
+//        FROM Goods g INNER JOIN (
+//            SELECT wg.warehouse.warehouseName, wg.goods.goodsId FROM WarehouseGoods wg
+//            WHERE wg.warehouse.warehouseId = 2
+//        ) AS x ON g.goodsId = x.goodsId
+//        WHERE numType = 2
+//        GROUP BY totalunit
+//    """)
+//    List<Object[]> temp();
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -53,5 +54,9 @@ public class RedisFGFWHTemplateService {
         }
         else  log.info("No keys found for pattern: {}", pattern);
         return result;
+    }
+
+    public boolean existsByKeyPattern(String pattern) {
+        return !Objects.requireNonNull(redisFGFWHTemplate.keys(pattern)).isEmpty();
     }
 }
