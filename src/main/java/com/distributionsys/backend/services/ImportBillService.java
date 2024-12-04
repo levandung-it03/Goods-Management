@@ -50,6 +50,7 @@ public class ImportBillService {
     private Long MAX_RETRY;
 
     public Double getTotalImport(Long importBillId) {
+//        importBillRepository.temp();
         return this.importBillRepository.totalImportBillByImportId(importBillId);
     }
 

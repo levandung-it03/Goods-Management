@@ -173,7 +173,7 @@ public class AdminService {
         var validStatusValues = List.of("active", "inactive");
         boolean isInvalidStatusParam = validStatusValues.stream().noneMatch(validStatus -> validStatus.equalsIgnoreCase(status));
         if (isInvalidStatusParam) {
-            throw new ApplicationException(ErrorCodes.INVAILD_STATUS_VALUE);
+            throw new ApplicationException(ErrorCodes.INVALID_STATUS_VALUE);
         }
 
         var targetUser = this.userRepository.findById(userId);

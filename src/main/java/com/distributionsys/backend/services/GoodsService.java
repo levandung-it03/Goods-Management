@@ -167,13 +167,14 @@ public class GoodsService {
         var fluxedWarehouseGoods = warehouseGoodsRepository.findAllById(request.getGoodsFromWarehouseIds())
             .stream()
             .map(warehouseGoods -> FluxedGoodsFromWarehouse.builder()
-                .id(email + "/" + FluxedGoodsFromWarehouse.GOODS_FROM_WAREHOUSE_ID + "_" + warehouseGoods.getWarehouseGoodsId())
+                .id(email + "/" + FluxedGoodsFromWarehouse.GOODS_FROM_WAREHOUSE_ID
+                    + "_" + warehouseGoods.getWarehouseGoodsId())
                 .currentQuantity(warehouseGoods.getCurrentQuantity())
                 .goodsFromWarehouseId(warehouseGoods.getWarehouseGoodsId())
                 .build())
             .toList();
-        //--Clear all old-data if it's exists
-        redisFGFWHTemplateService.deleteData(FluxedGoodsFromWarehouse.NAME + ":" + email);
+        if (redisFGFWHTemplateService.existsByKeyPattern(FluxedGoodsFromWarehouse.NAME + ":" + email))
+            throw new ApplicationException(ErrorCodes.EXISTING_SESSION_FOR_FLUX);
         fluxedGoodsFromWarehouseCrud.saveAll(fluxedWarehouseGoods);
     }
 
