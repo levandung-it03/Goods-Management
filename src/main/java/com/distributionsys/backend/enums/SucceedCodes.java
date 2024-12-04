@@ -46,7 +46,7 @@ public enum SucceedCodes {
     //--ImportBill(26)
     GET_IMPORT_BILL_PAGES(26001, "Get Import Bill pages successfully"),
     ADD_IMPORT_BILL(26002, "Add new Import Bill successfully"),
-    CREATE_IMPORT_BILL(26003, "Export Bill has been created successfully!"),
+    CREATE_IMPORT_BILL(26003, "Import Bill has been created successfully!"),
     GET_RECENT_IMPORT_BILL_LIST(26004, "Get recent Import Bill successfully!"),
     GET_IMPORT_BILL_DETAIL(26005,"Get Import Bill Detail successfully!"),
     TOTAL_IMPORT_BILL(26006, "Calculate total Import Bill successfully!"),

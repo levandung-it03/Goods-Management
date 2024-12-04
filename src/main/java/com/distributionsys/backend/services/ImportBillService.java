@@ -85,6 +85,7 @@ public class ImportBillService {
     }
 
     public void createImportBill(String accessToken, NewImportBillRequest request) {
+        //--Input: [{goods, warehouse, quantity},...]
         var email = jwtService.readPayload(accessToken).get("sub");
         var clientInfo = clientInfoRepository.findByUserEmail(email)
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
