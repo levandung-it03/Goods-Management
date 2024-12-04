@@ -8,7 +8,6 @@ import com.distributionsys.backend.dtos.response.ExportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.entities.sql.ExportBill;
 import com.distributionsys.backend.entities.sql.relationships.ExportBillWarehouseGoods;
-import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import com.distributionsys.backend.enums.SucceedCodes;
 import com.distributionsys.backend.services.ExportBillService;
 import jakarta.validation.Valid;
@@ -33,8 +32,7 @@ public class ExportBillControllers {
         @PathVariable Long exportBillId) {
         var data = this.exportBillService.getTotalImport(exportBillId);
         Double result = Objects.isNull(data) ? Double.valueOf(0) : data;
-        return ApiResponseObject.buildSuccessResponse(
-            SucceedCodes.PENDING_IMPORT_BILL, result);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.TOTAL_EXPORT_BILL, result);
     }
 
     @GetMapping("/user/v1/get-export-bill-pages")
@@ -58,7 +56,7 @@ public class ExportBillControllers {
         @RequestHeader("Authorization") String accessToken,
         @Valid @RequestBody NewExportBillRequest request) {
         exportBillService.createExportBill(accessToken, request);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.PENDING_EXPORT_BILL);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.CREATE_EXPORT_BILL);
     }
 
     @GetMapping("/user/v1/get-export-bill-top5")

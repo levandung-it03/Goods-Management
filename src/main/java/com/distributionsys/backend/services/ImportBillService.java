@@ -7,7 +7,9 @@ import com.distributionsys.backend.dtos.response.ImportBillDetailsResponse;
 import com.distributionsys.backend.dtos.response.TablePagesResponse;
 import com.distributionsys.backend.dtos.utils.ImportBillFilterRequest;
 import com.distributionsys.backend.dtos.utils.ImportBillWarehouseGoodsFilterRequest;
+import com.distributionsys.backend.entities.sql.Goods;
 import com.distributionsys.backend.entities.sql.ImportBill;
+import com.distributionsys.backend.entities.sql.Warehouse;
 import com.distributionsys.backend.entities.sql.relationships.ImportBillWarehouseGoods;
 import com.distributionsys.backend.entities.sql.relationships.WarehouseGoods;
 import com.distributionsys.backend.enums.ErrorCodes;
@@ -16,9 +18,7 @@ import com.distributionsys.backend.mappers.PageMappers;
 import com.distributionsys.backend.repositories.*;
 import com.distributionsys.backend.services.auth.JwtService;
 import com.distributionsys.backend.services.webflux.FluxedAsyncService;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -35,20 +35,19 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ImportBillService {
-    WarehouseGoodsRepository warehouseGoodsRepository;
-    ImportBillWarehouseGoodsRepository importBillWarehouseGoodsRepository;
-    ImportBillRepository importBillRepository;
-    ClientInfoRepository clientInfoRepository;
-    GoodsRepository goodsRepository;
-    WarehouseRepository warehouseRepository;
-    JwtService jwtService;
-    FluxedAsyncService fluxedAsyncService;
-    PageMappers pageMappers;
+    private final WarehouseGoodsRepository warehouseGoodsRepository;
+    private final ImportBillWarehouseGoodsRepository importBillWarehouseGoodsRepository;
+    private final ImportBillRepository importBillRepository;
+    private final ClientInfoRepository clientInfoRepository;
+    private final GoodsRepository goodsRepository;
+    private final WarehouseRepository warehouseRepository;
+    private final JwtService jwtService;
+    private final FluxedAsyncService fluxedAsyncService;
+    private final PageMappers pageMappers;
 
     @Value("${services.bills.max-retry-on-creation}")
-    public static Long MAX_RETRY;
+    private Long MAX_RETRY;
 
     public Double getTotalImport(Long importBillId) {
         return this.importBillRepository.totalImportBillByImportId(importBillId);
@@ -88,10 +87,16 @@ public class ImportBillService {
         var email = jwtService.readPayload(accessToken).get("sub");
         var clientInfo = clientInfoRepository.findByUserEmail(email)
             .orElseThrow(() -> new ApplicationException(ErrorCodes.INVALID_TOKEN));
-        var goodsListInOrder = goodsRepository.findAllById(request.getImportedWarehouseGoods().stream()
-            .map(NewImportBillRequest.ImportedWarehouseGoodsDto::getGoodsId).toList());
-        var warehouseListInOrder = warehouseRepository.findAllById(request.getImportedWarehouseGoods().stream()
-            .map(NewImportBillRequest.ImportedWarehouseGoodsDto::getWarehouseId).toList());
+        var goodsMap = goodsRepository
+            .findAllById(request.getImportedWarehouseGoods().stream()
+                .map(NewImportBillRequest.ImportedWarehouseGoodsDto::getGoodsId)
+                .toList())
+            .stream().collect(Collectors.toMap(Goods::getGoodsId, goods -> goods));
+        var warehouseMap = warehouseRepository
+            .findAllById(request.getImportedWarehouseGoods().stream()
+                .map(NewImportBillRequest.ImportedWarehouseGoodsDto::getWarehouseId)
+                .toList())
+            .stream().collect(Collectors.toMap(Warehouse::getWarehouseId, warehouse -> warehouse));
         var builtWarehouseGoodsIdPairs = new HashMap<String, Long>();
         for (NewImportBillRequest.ImportedWarehouseGoodsDto reqObj : request.getImportedWarehouseGoods())
             builtWarehouseGoodsIdPairs
@@ -110,24 +115,33 @@ public class ImportBillService {
                 foundObj.setCurrentQuantity(foundObj.getCurrentQuantity() + builtWarehouseGoodsIdPairs.get(key));
             }
             var savedWarehouseGoodsList = new ArrayList<WarehouseGoods>();
-            for (int index = 0; index < request.getImportedWarehouseGoods().size(); index++) {
-                var currentWarehouseGoods = request.getImportedWarehouseGoods().get(index);
+            for (NewImportBillRequest.ImportedWarehouseGoodsDto whGoodsInp: request.getImportedWarehouseGoods()) {
                 var updatedWarehouseGoods = updatedWhGoodsMarkers
-                    .get(currentWarehouseGoods.getGoodsId() + "," + currentWarehouseGoods.getWarehouseId());
+                    .get(whGoodsInp.getGoodsId() + "," + whGoodsInp.getWarehouseId());
                 if (Objects.isNull(updatedWarehouseGoods))
                     savedWarehouseGoodsList.add(WarehouseGoods.builder()
-                        .goods(goodsListInOrder.get(index))
-                        .warehouse(warehouseListInOrder.get(index))
-                        .currentQuantity(currentWarehouseGoods.getImportedGoodsQuantity())
+                        .goods(goodsMap.get(whGoodsInp.getGoodsId()))
+                        .warehouse(warehouseMap.get(whGoodsInp.getWarehouseId()))
+                        .currentQuantity(whGoodsInp.getImportedGoodsQuantity())
                         .build());
                 else savedWarehouseGoodsList.add(updatedWarehouseGoods);
             }
 
             try {
+                List<WarehouseGoods> newWarehouseGoodsList;
+                try {
+                    //--May throw DataIntegrityViolationException when saving (null-id-value entities)
+                    //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
+                    newWarehouseGoodsList = warehouseGoodsRepository.saveAll(savedWarehouseGoodsList);
+                } catch (ObjectOptimisticLockingFailureException | DataIntegrityViolationException e) {
+                    log.info("Retry creating ImportBill by: {}", clientInfo.getClientInfoId());
+                    continue;   //--Do it again
+                }
+
                 //--Save the rest data after all @Version entities are saved correctly.
                 var newImportBill = importBillRepository.save(ImportBill.builder()
                     .clientInfo(clientInfo).createdTime(LocalDateTime.now()).build());
-                importBillWarehouseGoodsRepository.saveAll(savedWarehouseGoodsList.stream().map(whGoods ->
+                importBillWarehouseGoodsRepository.saveAll(newWarehouseGoodsList.stream().map(whGoods ->
                     ImportBillWarehouseGoods.builder()
                         .warehouseGoods(whGoods)
                         .importBill(newImportBill)
@@ -135,14 +149,6 @@ public class ImportBillService {
                             .get(whGoods.getGoods().getGoodsId() + "," + whGoods.getWarehouse().getWarehouseId()))
                         .build()).toList());
 
-                try {
-                    //--May throw DataIntegrityViolationException when saving (null-id-value entities)
-                    //--May throw OptimisticLockException by @Version when updating (existing-id-value entities)
-                    warehouseGoodsRepository.saveAll(savedWarehouseGoodsList);
-                } catch (ObjectOptimisticLockingFailureException | DataIntegrityViolationException e) {
-                    log.info("Retry creating ImportBill by: {}", clientInfo.getClientInfoId());
-                    continue;   //--Do it again
-                }
                 //--Update Warehouse Goods or another fluxed streaming.
                 fluxedAsyncService.updateFluxedGoodsFromWarehouseQuantityInRedis(savedWarehouseGoodsList);
                 return;

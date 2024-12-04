@@ -37,23 +37,22 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ExportBillService {
-    RedisFGFWHTemplateService redisFGFWHTemplateService;
-    WarehouseGoodsRepository warehouseGoodsRepository;
-    ExportBillWarehouseGoodsRepository exportBillWarehouseGoodsRepository;
-    ExportBillRepository exportBillRepository;
-    ClientInfoRepository clientInfoRepository;
-    JwtService jwtService;
-    FluxedAsyncService fluxedAsyncService;
-    PageMappers pageMappers;
+    private final RedisFGFWHTemplateService redisFGFWHTemplateService;
+    private final WarehouseGoodsRepository warehouseGoodsRepository;
+    private final ExportBillWarehouseGoodsRepository exportBillWarehouseGoodsRepository;
+    private final ExportBillRepository exportBillRepository;
+    private final ClientInfoRepository clientInfoRepository;
+    private final JwtService jwtService;
+    private final FluxedAsyncService fluxedAsyncService;
+    private final PageMappers pageMappers;
 
     public Double getTotalImport(Long exportBillId) {
         return this.exportBillRepository.totalExportBillByExportId(exportBillId);
     }
 
     @Value("${services.bills.max-retry-on-creation}")
-    public static Long MAX_RETRY;
+    private Long MAX_RETRY;
 
     public TablePagesResponse<ExportBill> getExportBillPages(String accessToken,
                                                              PaginatedTableRequest request) {

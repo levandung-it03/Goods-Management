@@ -37,24 +37,8 @@ public interface ImportBillRepository extends JpaRepository<ImportBill, Long> {
     List<ImportBill> findTop5ByClientInfoIdOrderByCreatedTimeDesc(Long clientInfoId, PageRequest pageRequest);
 
     @Query("""
-        SELECT
-            SUM(g.unitPrice * selected_g.goodsQuantity)
-        FROM
-            Goods as g
-        INNER JOIN (
-            SELECT
-                ib.importBillId AS importBillId,
-                ib_detail.warehouseGoods.id AS goodsId,
-                ib_detail.goodsQuantity AS goodsQuantity
-            FROM
-                ImportBill AS ib
-            INNER JOIN
-                ImportBillWarehouseGoods AS ib_detail
-                    ON ib.importBillId = ib_detail.importBill.importBillId
-        ) AS selected_g
-            ON g.goodsId = selected_g.goodsId
-        WHERE
-            selected_g.importBillId = :importId
+        SELECT SUM(iwhg.warehouseGoods.goods.unitPrice * iwhg.goodsQuantity) FROM ImportBillWarehouseGoods iwhg
+        WHERE iwhg.importBill.importBillId = :importId
     """)
     Double totalImportBillByImportId(@Param("importId") Long importId);
 

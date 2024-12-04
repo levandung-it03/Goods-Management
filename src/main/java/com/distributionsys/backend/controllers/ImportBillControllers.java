@@ -32,8 +32,7 @@ public class ImportBillControllers {
         @PathVariable Long importBillId) {
         var data = this.importBillService.getTotalImport(importBillId);
         Double result = Objects.isNull(data) ? Double.valueOf(0) : data;
-        return ApiResponseObject.buildSuccessResponse(
-            SucceedCodes.PENDING_IMPORT_BILL, result);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.TOTAL_IMPORT_BILL, result);
     }
 
     @GetMapping("/user/v1/get-import-bill-pages")
@@ -57,7 +56,7 @@ public class ImportBillControllers {
         @RequestHeader("Authorization") String accessToken,
         @Valid @RequestBody NewImportBillRequest request) {
         importBillService.createImportBill(accessToken, request);
-        return ApiResponseObject.buildSuccessResponse(SucceedCodes.PENDING_IMPORT_BILL);
+        return ApiResponseObject.buildSuccessResponse(SucceedCodes.CREATE_IMPORT_BILL);
     }
 
     @GetMapping("/user/v1/get-import-bill-top5")
