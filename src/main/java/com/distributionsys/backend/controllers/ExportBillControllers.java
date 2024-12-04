@@ -29,9 +29,9 @@ public class ExportBillControllers {
     ExportBillService exportBillService;
 
     @GetMapping("/user/v1/total-export-bill/{exportBillId}")
-    public ResponseEntity<ApiResponseObject<String>> createImportBill(
+    public ResponseEntity<ApiResponseObject<String>> createExportBill(
         @PathVariable Long exportBillId) {
-        var data = this.exportBillService.getTotalImport(exportBillId);
+        var data = this.exportBillService.getTotalExport(exportBillId);
         Double result = Objects.isNull(data) ? Double.valueOf(0) : data;
         DecimalFormat df = new DecimalFormat("#,###.##");
         String formattedData = df.format(result);

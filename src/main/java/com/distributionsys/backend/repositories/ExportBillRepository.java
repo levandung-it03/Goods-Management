@@ -37,25 +37,30 @@ public interface ExportBillRepository extends JpaRepository<ExportBill, Long> {
         @Param("filterObj") ExportBillFilterRequest filterObj,
         Pageable pageableCf);
 
-        @Query("""
-        SELECT
-            SUM(g.unitPrice * selected_g.goodsQuantity)
-        FROM
-            Goods as g
-        INNER JOIN (
-            SELECT
-                eb.exportBillId AS exportBillId,
-                eb_detail.warehouseGoods.id AS goodsId,
-                eb_detail.goodsQuantity AS goodsQuantity
-            FROM
-                ExportBill AS eb
-            INNER JOIN
-                ExportBillWarehouseGoods AS eb_detail
-                    ON eb.exportBillId = eb_detail.exportBill.exportBillId
-        ) AS selected_g
-            ON g.goodsId = selected_g.goodsId
-        WHERE
-            selected_g.exportBillId = :exportId
+    // @Query("""
+    //     SELECT
+    //         SUM(g.unitPrice * selected_g.goodsQuantity)
+    //     FROM
+    //         Goods as g
+    //     INNER JOIN (
+    //         SELECT
+    //             eb.exportBillId AS exportBillId,
+    //             eb_detail.warehouseGoods.id AS goodsId,
+    //             eb_detail.goodsQuantity AS goodsQuantity
+    //         FROM
+    //             ExportBill AS eb
+    //         INNER JOIN
+    //             ExportBillWarehouseGoods AS eb_detail
+    //                 ON eb.exportBillId = eb_detail.exportBill.exportBillId
+    //     ) AS selected_g
+    //         ON g.goodsId = selected_g.goodsId
+    //     WHERE
+    //         selected_g.exportBillId = :exportId
+    // """)
+
+    @Query("""
+        SELECT SUM(ewhg.warehouseGoods.goods.unitPrice * ewhg.goodsQuantity) FROM ExportBillWarehouseGoods ewhg
+        WHERE ewhg.exportBill.exportBillId = :exportId
     """)
     Double totalExportBillByExportId(@Param("exportId") Long exportId);
 

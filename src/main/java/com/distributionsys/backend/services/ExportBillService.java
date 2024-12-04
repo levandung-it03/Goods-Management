@@ -47,7 +47,7 @@ public class ExportBillService {
     private final FluxedAsyncService fluxedAsyncService;
     private final PageMappers pageMappers;
 
-    public Double getTotalImport(Long exportBillId) {
+    public Double getTotalExport(Long exportBillId) {
         return this.exportBillRepository.totalExportBillByExportId(exportBillId);
     }
 
